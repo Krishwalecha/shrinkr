@@ -7,6 +7,7 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
+import QRCode from "react-qr-code";
 
 const ResultCard = ({ shortened, setShortened }) => {
   const [copied, setCopied] = useState(false);
@@ -33,6 +34,66 @@ const ResultCard = ({ shortened, setShortened }) => {
     } catch {
       toast.error("Failed to copy");
     }
+  };
+
+  const handleDownload = () => {
+    const svg = document.querySelector("#qr-code");
+
+    if (!svg) {
+      toast.error("QR code not found");
+      return;
+    }
+
+    const svgData = new XMLSerializer().serializeToString(svg);
+    const svgBlob = new Blob([svgData], {
+      type: "image/svg+xml;charset=utf-8",
+    });
+
+    const url = URL.createObjectURL(svgBlob);
+    const image = new Image();
+
+    image.onload = () => {
+      const canvas = document.createElement("canvas");
+      const size = 1000;
+
+      canvas.width = size;
+      canvas.height = size;
+
+      const context = canvas.getContext("2d");
+
+      context.fillStyle = "#ffffff";
+      context.fillRect(0, 0, size, size);
+
+      context.drawImage(image, 0, 0, size, size);
+
+      URL.revokeObjectURL(url);
+
+      canvas.toBlob((blob) => {
+        if (!blob) {
+          toast.error("Failed to generate QR");
+          return;
+        }
+
+        const downloadUrl = URL.createObjectURL(blob);
+
+        const link = document.createElement("a");
+        link.href = downloadUrl;
+        link.download = "shrinkr-qr.png";
+
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+
+        URL.revokeObjectURL(downloadUrl);
+      }, "image/png");
+    };
+
+    image.onerror = () => {
+      URL.revokeObjectURL(url);
+      toast.error("Failed to generate QR");
+    };
+
+    image.src = url;
   };
 
   return (
@@ -92,7 +153,7 @@ const ResultCard = ({ shortened, setShortened }) => {
             <button
               type="button"
               onClick={handleCopy}
-              className="flex h-10 items-center justify-center gap-1.5 rounded-lg border border-white/[0.14] bg-white/[0.06] px-4 text-sm font-medium text-white/80 transition hover:bg-white/10 hover:text-white"
+              className="flex h-10 items-center justify-center gap-1.5 rounded-lg border border-white/[0.14] bg-white/[0.06] px-4 text-sm font-medium text-white/80 transition hover:bg-white/10 hover:text-white cursor-pointer"
             >
               {copied ? (
                 <Check size={16} strokeWidth={1.5} />
@@ -139,13 +200,14 @@ const ResultCard = ({ shortened, setShortened }) => {
         <div className="flex min-w-0 flex-col items-center text-center sm:pl-5">
           <div className="aspect-square w-full max-w-[130px] rounded-lg border border-white/[0.14] bg-white p-2.5 shadow-[0_4px_16px_rgba(0,0,0,0.15)] sm:max-w-none">
             <div className="flex size-full items-center justify-center rounded-md">
-              <span className="text-xs text-black/30">QR CODE</span>
+              <QRCode id="qr-code" value={`shrinkr.link/${shortened.customAlias ? shortened.customAlias : shortened.shortCode}`} className="h-full w-full"/>
             </div>
           </div>
 
           <button
+            onClick={ () => handleDownload()}
             type="button"
-            className="mt-2.5 flex h-9 w-full max-w-[130px] items-center justify-center gap-1.5 rounded-lg border border-white/[0.14] bg-white/[0.06] text-xs font-medium text-white/80 transition hover:bg-white/10 hover:text-white sm:max-w-none"
+            className="mt-2.5 flex h-9 w-full max-w-[130px] items-center justify-center gap-1.5 rounded-lg border border-white/[0.14] bg-white/[0.06] text-xs font-medium text-white/80 transition hover:bg-white/10 hover:text-white sm:max-w-none cursor-pointer"
           >
             <ArrowDownToLine size={14} strokeWidth={1.5} />
             Download
