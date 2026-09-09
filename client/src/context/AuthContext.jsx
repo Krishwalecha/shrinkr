@@ -1,8 +1,7 @@
 import { createContext, useContext, useEffect, useState } from "react";
-import axios from "axios";
+import api from "@/lib/api";
 
 const AuthContext = createContext();
-const API_SERVER = import.meta.env.VITE_API_SERVER;
 
 const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
@@ -10,7 +9,7 @@ const AuthProvider = ({ children }) => {
 
   const checkAuth = async () => {
     try {
-      const res = await axios.get(`${API_SERVER}/auth/me`, {
+      const res = await api.get("/auth/me", {
         withCredentials: true,
       });
 
