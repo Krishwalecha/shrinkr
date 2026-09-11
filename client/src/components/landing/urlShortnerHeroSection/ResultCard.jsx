@@ -111,7 +111,6 @@ const ResultCard = ({ shortened, setShortened }) => {
 
   return (
     <div className="mt-8 w-full rounded-2xl border border-white/[0.18] bg-white/[0.09] p-2.5 backdrop-blur-md sm:p-3">
-      {/* Header */}
       <div className="flex items-start justify-between gap-3 border-b border-white/10 px-1 pb-3.5">
         <div className="min-w-0 text-left">
           <h2 className="text-base font-semibold tracking-tight text-white sm:text-lg">
@@ -136,9 +135,7 @@ const ResultCard = ({ shortened, setShortened }) => {
         </button>
       </div>
 
-      {/* Main */}
       <div className="mt-3.5 grid gap-3.5 sm:grid-cols-[minmax(0,1fr)_160px] sm:gap-0">
-        {/* Left */}
         <div className="min-w-0 text-left sm:border-r sm:border-white/10 sm:pr-4">
           <p className="text-[10px] font-semibold uppercase tracking-[0.13em] text-white/40 sm:text-[11px]">
             Short URL
@@ -155,7 +152,7 @@ const ResultCard = ({ shortened, setShortened }) => {
               href={shortUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex h-10 items-center justify-center gap-1.5 rounded-lg bg-white px-4 text-sm font-medium text-[#3057C9] transition-colors duration-150 hover:bg-white/90"
+              className="flex h-10 items-center justify-center gap-1.5 rounded-lg bg-white px-4 text-sm font-medium text-primary transition-colors duration-150 hover:bg-white/90"
             >
               <ExternalLink size={15} strokeWidth={1.5} />
               Open
@@ -211,7 +208,6 @@ const ResultCard = ({ shortened, setShortened }) => {
           </div>
         </div>
 
-        {/* QR */}
         <div className="flex min-w-0 flex-col items-center px-0 text-center sm:pl-4">
           <div className="aspect-square w-full max-w-[120px] rounded-xl border border-white/[0.14] bg-white p-2.5 shadow-[0_4px_16px_rgba(0,0,0,0.12)] sm:max-w-none">
             <QRCode id="qr-code" value={shortUrl} className="size-full" />

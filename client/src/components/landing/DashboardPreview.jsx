@@ -1,160 +1,157 @@
+import { LayoutDashboardIcon } from "lucide-react";
+
+import { SectionCards } from "@/components/dashboard/overview/section-cards";
+import { ChartAreaInteractive } from "@/components/dashboard/overview/chart-area-interactive";
+import { DataTable } from "@/components/dashboard/overview/data-table";
+
+const dummyOverview = {
+  stats: {
+    totalUrls: 24,
+    activeUrls: 18,
+    inactiveUrls: 4,
+    expiredUrls: 2,
+  },
+
+  clicksOverTime: Array.from({ length: 30 }).map((_, i) => {
+    const date = new Date();
+    date.setDate(date.getDate() - (29 - i));
+
+    return {
+      date: date.toISOString().slice(0, 10),
+      clicks: Math.floor(30 + Math.random() * 70 + i * 2),
+    };
+  }),
+
+  recentUrls: [
+    {
+      _id: "1",
+      longUrl: "https://example.com/blog/how-to-shorten-urls-effectively",
+      customAlias: "a8X2d3",
+      shortCode: "a8X2d3",
+      clickCount: 4281,
+      maxClicks: -1,
+      expiresAt: new Date(Date.now() + 2000 * 60 * 60 * 24 * 45).toISOString(),
+      isActive: true,
+    },
+    {
+      _id: "2",
+      longUrl: "https://docs.google.com/spreadsheets/d/some-long-id",
+      customAlias: null,
+      shortCode: "f9KdX9",
+      clickCount: 2914,
+      maxClicks: 5000,
+      expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 45).toISOString(),
+      isActive: true,
+    },
+    {
+      _id: "3",
+      longUrl: "https://github.com/krishwalecha/shrinkr",
+      customAlias: "Q2LmLn",
+      shortCode: "Q2LmLn",
+      clickCount: 1842,
+      maxClicks: -1,
+      expiresAt: new Date(Date.now() + 500 * 60 * 60 * 24 * 45).toISOString(),
+      isActive: false,
+    },
+  ],
+};
+
 const DashboardPreview = () => {
-  const stats = [
-    ["Total Clicks", "12,842"],
-    ["Active Links", "24"],
-    ["Countries", "18"],
-    ["Devices", "7"],
-  ];
-
-  const links = [
-    ["shrinkr.link/a8X2", "4,281"],
-    ["shrinkr.link/f9Kd", "2,914"],
-    ["shrinkr.link/Q2Lm", "1,842"],
-  ];
-
-  const bars = [35, 52, 44, 68, 58, 82, 70, 92, 76, 88, 72, 96];
-
   return (
-    <section className="mx-auto mt-8 hidden w-full max-w-5xl px-5 sm:px-6 md:block">
-      {/* Outer glass frame */}
+    <section className="mx-auto mt-8 w-full max-w-6xl px-4 sm:px-6">
       <div
         className="
+          overflow-hidden
           rounded-2xl
           border
           border-white/[0.18]
           bg-white/[0.09]
-          p-2.5
+          p-2
           shadow-[0_14px_45px_rgba(10,25,80,0.24)]
           backdrop-blur-md
+          sm:p-2.5
         "
       >
-        {/* Dashboard */}
-        <div className="overflow-hidden rounded-xl bg-white">
-          { /* Header */}
+        <div className="@container/main overflow-hidden rounded-xl bg-background">
+          <div className="flex items-center gap-3 border-b border-border px-4 py-4 sm:px-6">
+            <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+              <LayoutDashboardIcon className="size-5" />
+            </div>
 
-          <div className="flex h-[76px] items-center justify-between border-b border-gray-200 px-6">
-            <div>
-              <p className="text-[10px] font-medium uppercase tracking-[0.14em] text-gray-400">
-                Analytics
-              </p>
-
-              <h3 className="mt-1 text-xl font-semibold tracking-tight text-gray-900">
+            <div className="min-w-0">
+              <h3 className="text-base font-semibold tracking-tight text-foreground sm:text-lg">
                 Overview
               </h3>
-            </div>
 
-            <div className="rounded-lg border border-gray-200 px-3.5 py-2 text-xs font-medium text-gray-500">
-              Last 7 days
+              <p className="truncate text-xs text-muted-foreground sm:text-sm">
+                A snapshot of your links and their performance.
+              </p>
             </div>
           </div>
 
-          {/* Stats */}
+          <div
+            className="
+              flex
+              flex-col
+              gap-4
+              p-4
+              sm:gap-5
+              sm:p-5
 
-          <div className="grid grid-cols-4 gap-3.5 p-4">
-            {stats.map(([label, value]) => (
+              [&_[data-slot=card]]:gap-2
+              [&_[data-slot=card]]:py-3.5
+              [&_[data-slot=card]]:shadow-none
+              [&_[data-slot=card-header]]:gap-0.5
+              [&_[data-slot=card-header]]:px-3.5
+              [&_[data-slot=card-footer]]:hidden
+              [&_[data-slot=card-title]]:text-lg
+              [&_[data-slot=badge]]:max-lg:hidden
+            "
+          >
+            {/* Force 4-across regardless of container width */}
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+              <div className="contents [&>div]:contents">
+                <SectionCards overview={dummyOverview} />
+              </div>
+            </div>
+
+            {/* Chart tease */}
+            <div className="relative h-[190px] overflow-hidden rounded-xl sm:h-[220px]">
               <div
-                key={label}
                 className="
-                  flex
-                  h-[82px]
-                  flex-col
-                  justify-center
-                  rounded-lg
-                  border
-                  border-gray-200
-                  px-4
+                  pointer-events-none
+                  select-none
+
+                  [&_text]:!fill-slate-600
                 "
               >
-                <p className="text-[10px] font-medium text-gray-400">{label}</p>
-
-                <p className="mt-1.5 text-xl font-semibold tracking-tight text-gray-900">
-                  {value}
-                </p>
-              </div>
-            ))}
-          </div>
-
-          {/* Charts */}
-
-          <div className="grid gap-3.5 px-4 pb-4 md:grid-cols-[minmax(0,1fr)_250px]">
-            {/* Click chart */}
-            <div
-              className="
-                h-[218px]
-                rounded-lg
-                border
-                border-gray-200
-                p-4
-              "
-            >
-              <div className="flex items-center justify-between gap-3">
-                <p className="text-xs font-medium text-gray-800">
-                  Clicks Over Time
-                </p>
-
-                <p className="text-[10px] text-gray-400">Jan 1 — Jan 7</p>
+                <ChartAreaInteractive
+                  clicksOverTime={dummyOverview.clicksOverTime}
+                />
               </div>
 
-              <div className="mt-5 flex h-[155px] items-end gap-2">
-                {bars.map((height, index) => (
-                  <div
-                    key={index}
-                    className={`
-                      flex-1
-                      rounded-t-md
-                      transition-all
-                      duration-500
-                      ${index >= 8 ? "bg-[#3262DA]/50" : "bg-[#3262DA]/15"}
-                    `}
-                    style={{ height: `${height}%` }}
-                  />
-                ))}
-              </div>
+              <div className="pointer-events-none absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-background to-transparent" />
             </div>
 
-            {/* Top links */}
-            <div
-              className="
-                h-[218px]
-                rounded-lg
-                border
-                border-gray-200
-                p-4
-              "
-            >
-              <div className="flex items-center justify-between">
-                <p className="text-xs font-medium text-gray-800">Top Links</p>
+            {/* Recent links tease */}
+            <div className="relative h-[260px] overflow-hidden rounded-xl sm:h-[290px]">
+              <div
+                className="
+                  pointer-events-none
+                  select-none
 
-                <span className="cursor-pointer text-[10px] font-medium text-[#3262DA]">
-                  View all
-                </span>
+                  [&_h2]:!text-slate-900
+                  [&_p]:!text-slate-500
+                  [&_table]:!text-slate-900
+                  [&_th]:!text-slate-600
+                  [&_td]:!text-slate-900
+                  [&_td_span:not([data-slot=badge])]:!text-primary
+                "
+              >
+                <DataTable data={dummyOverview.recentUrls} />
               </div>
 
-              <div className="mt-5 space-y-4">
-                {links.map(([url, clicks], index) => (
-                  <div key={url}>
-                    <div className="flex items-center justify-between gap-2">
-                      <p className="truncate text-[10px] font-medium text-gray-700">
-                        {url}
-                      </p>
-
-                      <p className="shrink-0 text-[10px] text-gray-400">
-                        {clicks}
-                      </p>
-                    </div>
-
-                    <div className="mt-2 h-1 overflow-hidden rounded-full bg-gray-100">
-                      <div
-                        className="h-full rounded-full bg-[#3262DA]"
-                        style={{
-                          width:
-                            index === 0 ? "82%" : index === 1 ? "65%" : "48%",
-                        }}
-                      />
-                    </div>
-                  </div>
-                ))}
-              </div>
+              <div className="pointer-events-none absolute inset-x-0 bottom-0 h-10 bg-gradient-to-t from-background to-transparent" />
             </div>
           </div>
         </div>

@@ -56,7 +56,6 @@ const UrlGenerator = ({ setShortened, longUrl, setLongUrl }) => {
 
   return (
     <div className="mt-8 w-full rounded-2xl border border-white/20 bg-white/10 p-2.5 backdrop-blur-md sm:p-3">
-      {/* Main input */}
       <div className="flex min-w-0 flex-col gap-2 md:flex-row">
         <div className="flex min-w-0 flex-1 items-center gap-3 rounded-xl border border-white/10 bg-white/[0.08] px-4 py-3">
           <Link2
@@ -83,7 +82,7 @@ const UrlGenerator = ({ setShortened, longUrl, setLongUrl }) => {
           type="button"
           onClick={shortenUrl}
           disabled={loading}
-          className="flex h-11 w-[145px] shrink-0 cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-xl bg-white px-5 text-sm font-medium text-[#3262DA] transition-colors duration-150 hover:bg-white/90 disabled:cursor-not-allowed disabled:opacity-70"
+          className="flex h-11 w-[145px] shrink-0 cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-xl bg-white px-5 text-sm font-medium text-primary transition-colors duration-150 hover:bg-white/90 disabled:cursor-not-allowed disabled:opacity-70"
         >
           {loading ? (
             <Loader />
@@ -96,11 +95,9 @@ const UrlGenerator = ({ setShortened, longUrl, setLongUrl }) => {
         </button>
       </div>
 
-      {/* Advanced */}
       {showAdvanced && (
         <div className="mt-4 border-t border-white/10 pt-4">
           <div className="grid gap-5 md:grid-cols-2">
-            {/* Alias */}
             <div className="min-w-0">
               <p className="text-left text-xs font-medium text-white/85">
                 Custom Alias <span className="text-white/40">(optional)</span>
@@ -121,14 +118,12 @@ const UrlGenerator = ({ setShortened, longUrl, setLongUrl }) => {
               </div>
             </div>
 
-            {/* Controls */}
             <div className="min-w-0">
               <p className="text-left text-xs font-medium text-white/85">
                 Link controls
               </p>
 
               <div className="mt-2 grid grid-cols-1 gap-2.5 sm:grid-cols-2">
-                {/* Expiry */}
                 <div className="flex min-w-0 items-center overflow-hidden rounded-xl border border-white/10 bg-white/[0.08]">
                   <span className="shrink-0 px-3 text-xs text-white/60">
                     Days
@@ -163,7 +158,6 @@ const UrlGenerator = ({ setShortened, longUrl, setLongUrl }) => {
                   </div>
                 </div>
 
-                {/* Clicks */}
                 <div className="flex min-w-0 items-center overflow-hidden rounded-xl border border-white/10 bg-white/[0.08]">
                   <span className="shrink-0 px-3 text-xs text-white/60">
                     Clicks
@@ -205,7 +199,6 @@ const UrlGenerator = ({ setShortened, longUrl, setLongUrl }) => {
         </div>
       )}
 
-      {/* Bottom */}
       <div className="mt-3.5 flex flex-col gap-3 border-t border-white/10 pt-3 md:flex-row md:items-center md:justify-between md:border-t-0 md:pt-0">
         <div className="flex min-w-0 items-start gap-2 text-left text-[11px] leading-5 text-white/50 sm:text-xs">
           <ShieldCheck

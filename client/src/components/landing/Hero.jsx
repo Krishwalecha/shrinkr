@@ -24,7 +24,7 @@ const Hero = ({ longUrl, setLongUrl }) => {
           text-4xl
           font-semibold
           leading-[1.02]
-          tracking-[-0.055em]
+          tracking-[-0.03em]
           sm:text-5xl
           md:text-6xl
           lg:text-7xl
@@ -51,10 +51,7 @@ const Hero = ({ longUrl, setLongUrl }) => {
         Create short links in a click. No sign up required.
       </p>
 
-      <UrlShortener
-        longUrl={longUrl}
-        setLongUrl={setLongUrl}
-      />
+      <UrlShortener longUrl={longUrl} setLongUrl={setLongUrl} />
     </section>
   );
 };

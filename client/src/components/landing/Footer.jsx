@@ -4,7 +4,6 @@ import { FaGithub, FaEnvelope } from "react-icons/fa";
 const Footer = () => {
   return (
     <>
-      {/* Footer Content */}
       <footer
         className="
           mx-auto
@@ -28,21 +27,20 @@ const Footer = () => {
           "
         >
           <div className="max-w-sm">
-            <p className="text-3xl font-semibold tracking-tight text-gray-900">
-              shrinkr<span className="text-[#000090]">.</span>
+            <p className="text-3xl font-semibold tracking-tight text-foreground">
+              shrinkr<span className="text-primary">.</span>
             </p>
 
-            <p className="mt-4 text-sm font-medium leading-6 text-gray-800">
+            <p className="mt-4 text-sm font-medium leading-6 text-foreground">
               Short Links.
               <br />
               Big Possibilities.
             </p>
 
-            <p className="mt-3 text-sm leading-6 text-gray-500">
+            <p className="mt-3 text-sm leading-6 text-muted-foreground">
               Simple, fast, and built for the web.
             </p>
 
-            {/* Social / Contact */}
             <div id="contact" className="mt-5 flex items-center gap-2">
               <a
                 href="https://github.com/krishwalecha/shrinkr"
@@ -56,12 +54,12 @@ const Footer = () => {
                   justify-center
                   rounded-lg
                   border
-                  border-gray-200
-                  text-gray-500
+                  border-border
+                  text-muted-foreground
                   transition-colors
                   duration-150
-                  hover:border-gray-300
-                  hover:text-gray-900
+                  hover:border-foreground/30
+                  hover:text-foreground
                 "
               >
                 <FaGithub size={16} strokeWidth={1.7} />
@@ -77,20 +75,18 @@ const Footer = () => {
                   justify-center
                   rounded-lg
                   border
-                  border-gray-200
-                  text-gray-500
+                  border-border
+                  text-muted-foreground
                   transition-colors
                   duration-150
-                  hover:border-gray-300
-                  hover:text-gray-900
+                  hover:border-foreground/30
+                  hover:text-foreground
                 "
               >
                 <FaEnvelope size={16} strokeWidth={1.7} />
               </a>
             </div>
           </div>
-
-          {/* Product */}
 
           <div className="flex flex-col gap-3">
             <p
@@ -100,7 +96,7 @@ const Footer = () => {
                 font-semibold
                 uppercase
                 tracking-[0.16em]
-                text-gray-400
+                text-muted-foreground
               "
             >
               Product
@@ -110,10 +106,10 @@ const Footer = () => {
               href="#features"
               className="
                 text-sm
-                text-gray-500
+                text-muted-foreground
                 transition-colors
                 duration-150
-                hover:text-gray-900
+                hover:text-foreground
               "
             >
               Features
@@ -123,43 +119,41 @@ const Footer = () => {
               href="#process"
               className="
                 text-sm
-                text-gray-500
+                text-muted-foreground
                 transition-colors
                 duration-150
-                hover:text-gray-900
+                hover:text-foreground
               "
             >
-              How it works
+              Process
             </a>
 
             <Link
-              to="/dashboard"
+              to="/dashboard/overview"
               className="
                 text-sm
-                text-gray-500
+                text-muted-foreground
                 transition-colors
                 duration-150
-                hover:text-gray-900
+                hover:text-foreground
               "
             >
               Dashboard
             </Link>
 
             <Link
-              to="/analytics"
+              to="/dashboard/analytics"
               className="
                 text-sm
-                text-gray-500
+                text-muted-foreground
                 transition-colors
                 duration-150
-                hover:text-gray-900
+                hover:text-foreground
               "
             >
               Analytics
             </Link>
           </div>
-
-          {/* Legal */}
 
           <div className="flex flex-col gap-3">
             <p
@@ -169,7 +163,7 @@ const Footer = () => {
                 font-semibold
                 uppercase
                 tracking-[0.16em]
-                text-gray-400
+                text-muted-foreground
               "
             >
               Legal
@@ -179,10 +173,10 @@ const Footer = () => {
               to="/terms"
               className="
                 text-sm
-                text-gray-500
+                text-muted-foreground
                 transition-colors
                 duration-150
-                hover:text-gray-900
+                hover:text-foreground
               "
             >
               Terms of Service
@@ -192,10 +186,10 @@ const Footer = () => {
               to="/privacy"
               className="
                 text-sm
-                text-gray-500
+                text-muted-foreground
                 transition-colors
                 duration-150
-                hover:text-gray-900
+                hover:text-foreground
               "
             >
               Privacy Policy
@@ -203,10 +197,8 @@ const Footer = () => {
           </div>
         </div>
 
-        {/* Copyright */}
-
-        <div className="mt-10 border-t border-gray-200 pt-5">
-          <p className="text-xs text-gray-400">
+        <div className="mt-10 border-t border-border pt-5">
+          <p className="text-xs text-muted-foreground">
             © 2026 Shrinkr. All rights reserved.
           </p>
         </div>

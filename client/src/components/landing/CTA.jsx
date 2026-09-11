@@ -1,4 +1,3 @@
-import footerBg from "@/assets/footer-bg.jpg";
 import { Link2, ArrowRight } from "lucide-react";
 
 const CTA = ({ longUrl, setLongUrl }) => {
@@ -10,16 +9,14 @@ const CTA = ({ longUrl, setLongUrl }) => {
   };
   return (
     <div
-      style={{ backgroundImage: `url(${footerBg})` }}
       className="
-      relative
-      overflow-hidden
-      rounded-2xl
-      bg-cover
-      bg-center
-      bg-no-repeat
-      text-white
-      sm:rounded-[28px]"
+        relative
+        overflow-hidden
+        rounded-2xl
+        bg-[linear-gradient(120deg,#050B3D_0%,#0B2A9B_32%,#1749D8_55%,#2520A0_78%,#120B55_100%)]
+        text-white
+        sm:rounded-[28px]
+      "
     >
       <div
         className="
@@ -38,29 +35,26 @@ const CTA = ({ longUrl, setLongUrl }) => {
         sm:pt-16
       "
       >
-        {/* Eyebrow */}
         <p className="text-xl font-semibold tracking-tight sm:text-2xl">
           Ready to shrink?
         </p>
 
-        {/* Heading */}
         <h2
           className="
           mt-5
           text-4xl
           font-bold
           leading-[1.04]
-          tracking-[-0.045em]
+          tracking-[-0.03em]
           sm:text-5xl
           md:text-6xl
         "
         >
-          <span className="text-white/50">Your links.</span>
+          <span className="text-white/50">Shrink it.</span>
           <br />
-          <span>Just Shorter.</span>
+          <span>Share it anywhere.</span>
         </h2>
 
-        {/* Description */}
         <p
           className="
           mt-5
@@ -74,7 +68,6 @@ const CTA = ({ longUrl, setLongUrl }) => {
           Shorten, customize and track your links in seconds.
         </p>
 
-        {/* URL INPUT */}
         <div
           className="
           mt-8
@@ -87,7 +80,6 @@ const CTA = ({ longUrl, setLongUrl }) => {
           md:flex-row
         "
         >
-          {/* Input */}
           <div
             className="
             flex
@@ -132,7 +124,6 @@ const CTA = ({ longUrl, setLongUrl }) => {
             />
           </div>
 
-          {/* Button */}
           <button
             type="button"
             onClick={handleShortenClick}
@@ -149,13 +140,13 @@ const CTA = ({ longUrl, setLongUrl }) => {
             px-5
             text-sm
             font-medium
-            text-[#3262DA]
+            text-primary
             transition-all
             duration-200
-            hover:-translate-y-px
             hover:bg-white/90
             sm:px-6
             md:w-auto
+            cursor-pointer
           "
           >
             Shorten Link
