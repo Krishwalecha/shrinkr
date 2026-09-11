@@ -196,6 +196,116 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, null, "Access token refreshed successfully"));
 });
 
+const updateProfile = asyncHandler(async (req, res) => {
+  const { userId } = req.user;
+  const { name, email, username } = req.body;
+
+  const user = await User.findById(userId);
+
+  if (!user) {
+    throw new ApiError(404, "User not found");
+  }
+
+  if (name !== undefined) {
+    if (!name.trim()) {
+      throw new ApiError(400, "Name cannot be empty");
+    }
+
+    user.name = name.trim();
+  }
+
+  if (email !== undefined) {
+    const normalizedEmail = email.trim().toLowerCase();
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (!emailRegex.test(normalizedEmail)) {
+      throw new ApiError(400, "Please enter a valid email address");
+    }
+
+    if (normalizedEmail !== user.email) {
+      const existingEmail = await User.findOne({
+        email: normalizedEmail,
+        _id: { $ne: userId },
+      });
+
+      if (existingEmail) {
+        throw new ApiError(400, "Email is already registered");
+      }
+
+      user.email = normalizedEmail;
+    }
+  }
+
+  if (username !== undefined) {
+    const normalizedUsername = username.trim().toLowerCase();
+    const usernameRegex = /^[a-z0-9_]+$/;
+
+    if (!usernameRegex.test(normalizedUsername)) {
+      throw new ApiError(
+        400,
+        "Username can only contain letters, numbers, and underscores",
+      );
+    }
+
+    if (normalizedUsername !== user.username) {
+      const existingUsername = await User.findOne({
+        username: normalizedUsername,
+        _id: { $ne: userId },
+      });
+
+      if (existingUsername) {
+        throw new ApiError(400, "Username is already taken");
+      }
+
+      user.username = normalizedUsername;
+    }
+  }
+
+  await user.save();
+
+  const userObj = user.toObject();
+
+  delete userObj.password;
+  delete userObj.refreshToken;
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, userObj, "Profile updated successfully"));
+});
+
+const changePassword = asyncHandler(async (req, res) => {
+  const { userId } = req.user;
+  const { currentPassword, newPassword } = req.body;
+
+  if (!currentPassword || !newPassword) {
+    throw new ApiError(400, "Current and new password are required");
+  }
+
+  if (newPassword.length < 8) {
+    throw new ApiError(400, "New password must be at least 8 characters");
+  }
+
+  const user = await User.findById(userId);
+
+  if (!user) {
+    throw new ApiError(404, "User not found");
+  }
+
+  const isPasswordCorrect = await user.isPasswordCorrect(currentPassword);
+
+  if (!isPasswordCorrect) {
+    throw new ApiError(400, "Current password is incorrect");
+  }
+
+  user.password = newPassword;
+
+  await user.save();
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, null, "Password updated successfully"));
+});
+
 const generateTokens = (user) => {
   const accessToken = user.generateAccessToken();
   const refreshToken = user.generateRefreshToken();
@@ -206,4 +316,12 @@ const generateTokens = (user) => {
   };
 };
 
-export { registerUser, loginUser, logoutUser, refreshAccessToken, getUserInfo };
+export {
+  registerUser,
+  loginUser,
+  logoutUser,
+  refreshAccessToken,
+  getUserInfo,
+  updateProfile,
+  changePassword,
+};
