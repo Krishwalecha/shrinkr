@@ -3,11 +3,9 @@ import { Check, Link2 } from "lucide-react";
 import { toast } from "sonner";
 
 import api from "@/lib/api";
-import Loader from "@/components/loader";
 
 import { PageHeader } from "@/components/dashboard/shared/page-header";
 import { CreateForm } from "@/components/dashboard/create/CreateForm";
-import { CreateLinkActions } from "@/components/dashboard/create/LinkActions";
 import { CreateResult } from "@/components/dashboard/create/CreateResult";
 
 export default function CreateNew() {

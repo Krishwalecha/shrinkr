@@ -1,7 +1,7 @@
 import { Link, useNavigate } from "react-router-dom";
 import { FaGoogle, FaGithub } from "react-icons/fa";
 import { useState } from "react";
-import Loader from "@/components/loader.jsx";
+import Loader from "@/components/Loader.jsx";
 import { Eye, EyeOff, ChevronLeft } from "lucide-react";
 import { toast } from "sonner";
 import authBg from "@/assets/auth-background.webp";
