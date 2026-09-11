@@ -199,10 +199,6 @@ const Features = () => {
                 <span className="text-[10px] font-medium text-primary">
                   Customize anytime
                 </span>
-
-                <span className="ml-auto text-[9px] text-muted-foreground">
-                  • 5 aliases available
-                </span>
               </div>
             </Card>
 

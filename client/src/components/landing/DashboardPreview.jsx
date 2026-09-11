@@ -58,7 +58,7 @@ const dummyOverview = {
 
 const DashboardPreview = () => {
   return (
-    <section className="mx-auto mt-8 w-full max-w-6xl px-4 sm:px-6">
+    <section className="mx-auto mt-8 w-full max-w-6xl px-4 sm:px-6 mb-8 md:mb-0">
       <div
         className="
           overflow-hidden
@@ -108,14 +108,13 @@ const DashboardPreview = () => {
               [&_[data-slot=badge]]:max-lg:hidden
             "
           >
-            {/* Force 4-across regardless of container width */}
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
               <div className="contents [&>div]:contents">
                 <SectionCards overview={dummyOverview} />
               </div>
             </div>
 
-            {/* Chart tease */}
+            {/* Chart */}
             <div className="relative h-[190px] overflow-hidden rounded-xl sm:h-[220px]">
               <div
                 className="
@@ -133,8 +132,8 @@ const DashboardPreview = () => {
               <div className="pointer-events-none absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-background to-transparent" />
             </div>
 
-            {/* Recent links tease */}
-            <div className="relative h-[260px] overflow-hidden rounded-xl sm:h-[290px]">
+            {/* Recent links */}
+            <div className="relative h-[260px] overflow-hidden rounded-xl sm:h-[290px] hidden md:block">
               <div
                 className="
                   pointer-events-none

@@ -56,6 +56,7 @@ const UrlGenerator = ({ setShortened, longUrl, setLongUrl }) => {
 
   return (
     <div className="mt-8 w-full rounded-2xl border border-white/20 bg-white/10 p-2.5 backdrop-blur-md sm:p-3">
+      {/* Main URL Input */}
       <div className="flex min-w-0 flex-col gap-2 md:flex-row">
         <div className="flex min-w-0 flex-1 items-center gap-3 rounded-xl border border-white/10 bg-white/[0.08] px-4 py-3">
           <Link2
@@ -82,7 +83,7 @@ const UrlGenerator = ({ setShortened, longUrl, setLongUrl }) => {
           type="button"
           onClick={shortenUrl}
           disabled={loading}
-          className="flex h-11 w-[145px] shrink-0 cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-xl bg-white px-5 text-sm font-medium text-primary transition-colors duration-150 hover:bg-white/90 disabled:cursor-not-allowed disabled:opacity-70"
+          className="flex h-11 w-full shrink-0 cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-xl bg-white px-5 text-sm font-medium text-primary transition-colors duration-150 hover:bg-white/90 disabled:cursor-not-allowed disabled:opacity-70 md:w-[145px]"
         >
           {loading ? (
             <Loader />
@@ -95,37 +96,41 @@ const UrlGenerator = ({ setShortened, longUrl, setLongUrl }) => {
         </button>
       </div>
 
+      {/* Advanced Options */}
       {showAdvanced && (
         <div className="mt-4 border-t border-white/10 pt-4">
-          <div className="grid gap-5 md:grid-cols-2">
+          <div className="grid items-start gap-5 md:grid-cols-2">
+            {/* Custom Alias */}
             <div className="min-w-0">
-              <p className="text-left text-xs font-medium text-white/85">
+              <p className="text-left text-xs font-medium leading-4 text-white/85">
                 Custom Alias <span className="text-white/40">(optional)</span>
               </p>
 
-              <div className="mt-2 flex min-w-0 overflow-hidden rounded-xl border border-white/10 bg-white/[0.08]">
-                <span className="shrink-0 border-r border-white/10 px-3 py-2.5 text-xs text-white/70">
+              <div className="mt-2 flex h-[52px] min-h-[52px] w-full min-w-0 overflow-hidden rounded-xl border border-white/10 bg-white/[0.08]">
+                <span className="flex h-full shrink-0 items-center border-r border-white/10 px-3 text-xs leading-none text-white/70">
                   shrinkr.link/
                 </span>
 
                 <input
                   type="text"
                   placeholder="your-alias"
-                  className="min-w-0 flex-1 bg-transparent px-3 py-2.5 text-sm text-white outline-none placeholder:text-white/35"
+                  className="min-w-0 flex-1 bg-transparent px-3 text-sm leading-none text-white outline-none placeholder:text-white/35"
                   value={customAlias}
                   onChange={(e) => setCustomAlias(e.target.value)}
                 />
               </div>
             </div>
 
+            {/* Link Controls */}
             <div className="min-w-0">
-              <p className="text-left text-xs font-medium text-white/85">
+              <p className="text-left text-xs font-medium leading-4 text-white/85">
                 Link controls
               </p>
 
               <div className="mt-2 grid grid-cols-1 gap-2.5 sm:grid-cols-2">
-                <div className="flex min-w-0 items-center overflow-hidden rounded-xl border border-white/10 bg-white/[0.08]">
-                  <span className="shrink-0 px-3 text-xs text-white/60">
+                {/* Days */}
+                <div className="flex h-[52px] min-h-[52px] min-w-0 items-center overflow-hidden rounded-xl border border-white/10 bg-white/[0.08]">
+                  <span className="flex h-full shrink-0 items-center px-3 text-xs leading-none text-white/60">
                     Days
                   </span>
 
@@ -136,30 +141,31 @@ const UrlGenerator = ({ setShortened, longUrl, setLongUrl }) => {
                     onChange={(e) =>
                       setExpiresIn(Math.max(1, Number(e.target.value)))
                     }
-                    className="min-w-0 flex-1 bg-transparent px-2 py-2.5 text-sm text-white outline-none [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                    className="min-w-0 flex-1 bg-transparent px-2 text-sm leading-none text-white outline-none [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
                   />
 
-                  <div className="flex shrink-0 flex-col border-l border-white/10">
+                  <div className="flex h-full shrink-0 flex-col border-l border-white/10">
                     <button
                       type="button"
                       onClick={() => changeValue(setExpiresIn, 1, 1)}
-                      className="px-2 py-0.5 text-white/50 transition-colors hover:text-white"
+                      className="flex h-1/2 items-center px-2 text-white/50 outline-none transition-colors hover:text-white focus:outline-none"
                     >
-                      <ChevronUp size={13} />
+                      <ChevronUp size={13} strokeWidth={1.5} />
                     </button>
 
                     <button
                       type="button"
                       onClick={() => changeValue(setExpiresIn, -1, 1)}
-                      className="px-2 py-0.5 text-white/50 transition-colors hover:text-white"
+                      className="flex h-1/2 items-center px-2 text-white/50 outline-none transition-colors hover:text-white focus:outline-none"
                     >
-                      <ChevronDown size={13} />
+                      <ChevronDown size={13} strokeWidth={1.5} />
                     </button>
                   </div>
                 </div>
 
-                <div className="flex min-w-0 items-center overflow-hidden rounded-xl border border-white/10 bg-white/[0.08]">
-                  <span className="shrink-0 px-3 text-xs text-white/60">
+                {/* Clicks */}
+                <div className="flex h-[52px] min-h-[52px] min-w-0 items-center overflow-hidden rounded-xl border border-white/10 bg-white/[0.08]">
+                  <span className="flex h-full shrink-0 items-center px-3 text-xs leading-none text-white/60">
                     Clicks
                   </span>
 
@@ -168,30 +174,30 @@ const UrlGenerator = ({ setShortened, longUrl, setLongUrl }) => {
                     value={maxClicks}
                     min={-1}
                     onChange={(e) => setMaxClicks(Number(e.target.value))}
-                    className="min-w-0 flex-1 bg-transparent px-2 py-2.5 text-sm text-white outline-none [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                    className="min-w-0 flex-1 bg-transparent px-2 text-sm leading-none text-white outline-none [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
                   />
 
-                  <div className="flex shrink-0 flex-col border-l border-white/10">
+                  <div className="flex h-full shrink-0 flex-col border-l border-white/10">
                     <button
                       type="button"
                       onClick={() => changeValue(setMaxClicks, 1, -1)}
-                      className="px-2 py-0.5 text-white/50 transition-colors hover:text-white"
+                      className="flex h-1/2 items-center px-2 text-white/50 outline-none transition-colors hover:text-white focus:outline-none"
                     >
-                      <ChevronUp size={13} />
+                      <ChevronUp size={13} strokeWidth={1.5} />
                     </button>
 
                     <button
                       type="button"
                       onClick={() => changeValue(setMaxClicks, -1, -1)}
-                      className="px-2 py-0.5 text-white/50 transition-colors hover:text-white"
+                      className="flex h-1/2 items-center px-2 text-white/50 outline-none transition-colors hover:text-white focus:outline-none"
                     >
-                      <ChevronDown size={13} />
+                      <ChevronDown size={13} strokeWidth={1.5} />
                     </button>
                   </div>
                 </div>
               </div>
 
-              <p className="mt-1.5 text-right text-[10px] text-white/35">
+              <p className="mt-1.5 text-right text-[10px] leading-3 text-white/35">
                 -1 = unlimited clicks
               </p>
             </div>
@@ -199,7 +205,9 @@ const UrlGenerator = ({ setShortened, longUrl, setLongUrl }) => {
         </div>
       )}
 
-      <div className="mt-3.5 flex flex-col gap-3 border-t border-white/10 pt-3 md:flex-row md:items-center md:justify-between md:border-t-0 md:pt-0">
+      {/* Footer */}
+      <div className="mt-3.5 flex min-h-[28px] flex-col gap-3 border-t border-white/10 pt-3 md:flex-row md:items-center md:justify-between md:border-t-0 md:pt-0">
+        {/* Terms */}
         <div className="flex min-w-0 items-start gap-2 text-left text-[11px] leading-5 text-white/50 sm:text-xs">
           <ShieldCheck
             size={17}
@@ -226,10 +234,11 @@ const UrlGenerator = ({ setShortened, longUrl, setLongUrl }) => {
           </p>
         </div>
 
+        {/* Advanced Toggle */}
         <button
           type="button"
           onClick={() => setShowAdvanced((prev) => !prev)}
-          className="flex shrink-0 cursor-pointer items-center gap-1.5 self-end text-xs font-medium text-white/60 transition-colors hover:text-white md:self-auto"
+          className="flex h-7 shrink-0 cursor-pointer items-center gap-1.5 self-end text-xs font-medium leading-4 text-white/60 outline-none transition-colors hover:text-white focus:outline-none focus-visible:outline-none md:self-auto"
         >
           {showAdvanced ? "Hide options" : "Advanced options"}
 

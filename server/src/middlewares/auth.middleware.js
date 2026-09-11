@@ -17,7 +17,7 @@ const verifyJWT = async (req, res, next) => {
     req.user = decoded;
     next();
   } catch (error) {
-    throw new ApiError(401, "Invalid or expired access token");
+    throw new ApiError(401, "Sign in session expired, please sign in again");
   }
 };
 

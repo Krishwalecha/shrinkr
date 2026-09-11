@@ -74,7 +74,7 @@ const redirectUrl = asyncHandler(async (req, res) => {
     throw new ApiError(410, "Max clicks reached");
   }
 
-  updateAnalytics(req, url).catch(() => {});
+  updateAnalytics(req, url);
 
   return res.redirect(url.longUrl);
 });
@@ -457,27 +457,48 @@ const getOverview = asyncHandler(async (req, res) => {
 
 const updateAnalytics = async (req, url) => {
   const urlId = url._id;
-
   const ip = req.ip;
-  const response = await fetch(
-    `http://ip-api.com/json/${ip}?fields=status,country`,
-  );
-  const data = response.ok ? await response.json() : null;
-  const country = data?.status === "success" ? data.country : "Unknown";
 
-  const userAgent = req.headers["user-agent"];
+  let country = "Unknown";
+
+  try {
+    const response = await fetch(
+      `http://ip-api.com/json/${encodeURIComponent(
+        ip,
+      )}?fields=status,country,message`,
+    );
+
+    const data = await response.json();
+
+    if (data?.status === "success") {
+      country = data.country || "Unknown";
+    }
+  } catch (error) {}
+
+  const userAgent = req.headers["user-agent"] || "";
   const parsedUserAgent = UAParser(userAgent);
 
   const os = parsedUserAgent.os.name || "Unknown";
 
   let browser = parsedUserAgent.browser.name || "Unknown";
-  browser = browser.includes("Mobile Safari") ? "Safari" : browser;
 
-  const deviceType = parsedUserAgent.device.type || "desktop";
+  if (browser.includes("Mobile Safari")) {
+    browser = "Safari";
+  }
 
-  const referrer = req.headers["referer"]
-    ? new URL(req.headers["referer"]).hostname.replace(/^www\./, "")
-    : "direct";
+  const deviceType =
+    (parsedUserAgent.device.type || "desktop").charAt(0).toUpperCase() +
+    (parsedUserAgent.device.type || "desktop").slice(1);
+
+  let referrer = "direct";
+
+  if (req.headers["referer"]) {
+    try {
+      referrer = new URL(req.headers["referer"]).hostname.replace(/^www\./, "");
+    } catch {
+      referrer = "direct";
+    }
+  }
 
   const date = new Date();
   date.setUTCHours(0, 0, 0, 0);
