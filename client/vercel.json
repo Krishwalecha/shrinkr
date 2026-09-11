@@ -1,0 +1,12 @@
+{
+  "rewrites": [
+    {
+      "source": "/:id((?!signin$|signup$|privacy$|terms$|dashboard$)[A-Za-z0-9_-]+)",
+      "destination": "https://api.shrinkr.link/api/v1/urls/:id"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ]
+}
