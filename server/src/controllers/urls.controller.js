@@ -58,20 +58,13 @@ const redirectUrl = asyncHandler(async (req, res) => {
     ],
   });
 
-  if (!url) {
-    throw new ApiError(404, "URL not found");
-  }
-
-  if (!url.isActive) {
-    throw new ApiError(410, "URL is not active");
-  }
-
-  if (url.expiresAt && url.expiresAt.getTime() < Date.now()) {
-    throw new ApiError(410, "URL has expired");
-  }
-
-  if (url.maxClicks !== -1 && url.clickCount >= url.maxClicks) {
-    throw new ApiError(410, "Max clicks reached");
+  if (
+    !url ||
+    !url.isActive ||
+    (url.expiresAt && url.expiresAt < new Date()) ||
+    (url.maxClicks !== -1 && url.clickCount >= url.maxClicks)
+  ) {
+    return res.redirect(`${process.env.CORS_ORIGIN}/link-unavailable`);
   }
 
   updateAnalytics(req, url);

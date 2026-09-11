@@ -5,6 +5,7 @@ import { Signin } from "./pages/Signin.jsx";
 import { SignUp } from "./pages/Signup.jsx";
 import Privacy from "./pages/Privacy.jsx";
 import Terms from "./pages/Terms.jsx";
+import NotFound from "./pages/NotFound.jsx";
 
 import DashboardLayout from "./pages/dashboard/DashboardLayout.jsx";
 import Overview from "./pages/dashboard/Overview.jsx";
@@ -36,6 +37,9 @@ const App = () => {
           <Route path="settings" element={<Settings />} />
         </Route>
       </Route>
+
+      <Route path="/link-unavailable" element={<NotFound />} />
+      <Route path="*" element={<NotFound />} />
     </Routes>
   );
 };

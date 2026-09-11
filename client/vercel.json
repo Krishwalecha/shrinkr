@@ -1,7 +1,7 @@
 {
   "rewrites": [
     {
-      "source": "/:id((?!signin$|signup$|privacy$|terms$|dashboard$)[A-Za-z0-9_-]+)",
+      "source": "/:id((?!signin$|signup$|privacy$|terms$|dashboard$|link-unavailable$)[A-Za-z0-9_-]+)",
       "destination": "https://api.shrinkr.link/api/v1/urls/:id"
     },
     {
