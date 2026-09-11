@@ -6,9 +6,23 @@ import { reservedCustomAliases } from "../constants.js";
 import mongoose from "mongoose";
 import { Analytics } from "../models/analytics.model.js";
 import { UAParser } from "ua-parser-js";
+import { randomUUID } from "crypto";
 
 const createShortUrl = asyncHandler(async (req, res) => {
-  const { userId: user } = req.user;
+  let user = req.user?.userId || null;
+  let visitorId = req.cookies?.visitorId || null;
+
+  if (!user && !visitorId) {
+    visitorId = randomUUID();
+
+    res.cookie("visitorId", visitorId, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      maxAge: 1000 * 60 * 60 * 24 * 365,
+    });
+  }
+
   const { longUrl, expiresIn = 90, customAlias, maxClicks = -1 } = req.body;
 
   const normalizedUrl = validateUrl(longUrl);
@@ -28,6 +42,7 @@ const createShortUrl = asyncHandler(async (req, res) => {
 
   const url = await Url.create({
     user,
+    visitorId,
     longUrl: normalizedUrl,
     shortCode,
     expiresIn,

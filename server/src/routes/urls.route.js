@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { verifyJWT } from "../middlewares/auth.middleware.js";
+import { optionalJWT, verifyJWT } from "../middlewares/auth.middleware.js";
 import {
   createShortUrl,
   redirectUrl,
@@ -15,7 +15,7 @@ import {
 
 const UrlRouter = Router();
 
-UrlRouter.post("/", verifyJWT, createShortUrl);
+UrlRouter.post("/", optionalJWT, createShortUrl);
 UrlRouter.get("/", verifyJWT, getUserUrls);
 UrlRouter.get("/overview", verifyJWT, getOverview);
 UrlRouter.get("/analytics", verifyJWT, getUserAnalytics);

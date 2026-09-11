@@ -6,7 +6,7 @@ const verifyJWT = async (req, res, next) => {
   try {
     const accessToken =
       req.cookies?.accessToken ||
-      req.header("Authorization")?.replace("Bearer ", "");
+      req.header("Authorization")?.replace(/^Bearer\s+/i, "");
 
     if (!accessToken) {
       throw new ApiError(401, "Unauthorized");
@@ -15,9 +15,31 @@ const verifyJWT = async (req, res, next) => {
     const decoded = jwt.verify(accessToken, process.env.ACCESS_TOKEN_SECRET);
 
     req.user = decoded;
+
     next();
   } catch (error) {
-    throw new ApiError(401, "Sign in session expired, please sign in again");
+    next(new ApiError(401, "Sign in session expired, please sign in again"));
+  }
+};
+
+const optionalJWT = async (req, res, next) => {
+  try {
+    const accessToken =
+      req.cookies?.accessToken ||
+      req.header("Authorization")?.replace(/^Bearer\s+/i, "");
+
+    if (!accessToken) {
+      req.user = null;
+      return next();
+    }
+
+    const decoded = jwt.verify(accessToken, process.env.ACCESS_TOKEN_SECRET);
+
+    req.user = decoded;
+
+    next();
+  } catch (error) {
+    next(new ApiError(401, "Sign in session expired, please sign in again"));
   }
 };
 
@@ -38,10 +60,11 @@ const verifyRefreshToken = async (req, res, next) => {
     }
 
     req.user = decoded;
+
     next();
   } catch (error) {
-    throw new ApiError(401, "Invalid or expired refresh token");
+    next(new ApiError(401, "Invalid or expired refresh token"));
   }
 };
 
-export { verifyJWT, verifyRefreshToken };
+export { verifyJWT, optionalJWT, verifyRefreshToken };
