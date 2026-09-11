@@ -7,17 +7,19 @@ import {
   updateUrl,
   toggleStatus,
   deleteShortUrl,
-  getUrlStats,
+  batchDeleteUrls,
   getUrlAnalytics,
   getUserAnalytics,
+  getOverview,
 } from "../controllers/urls.controller.js";
 
 const UrlRouter = Router();
 
 UrlRouter.post("/", verifyJWT, createShortUrl);
 UrlRouter.get("/", verifyJWT, getUserUrls);
-UrlRouter.get("/stats", verifyJWT, getUrlStats);
+UrlRouter.get("/overview", verifyJWT, getOverview);
 UrlRouter.get("/analytics", verifyJWT, getUserAnalytics);
+UrlRouter.delete("/batch", verifyJWT, batchDeleteUrls);
 UrlRouter.patch("/:id/status", verifyJWT, toggleStatus);
 UrlRouter.patch("/:id", verifyJWT, updateUrl);
 UrlRouter.delete("/:id", verifyJWT, deleteShortUrl);

@@ -74,7 +74,7 @@ const redirectUrl = asyncHandler(async (req, res) => {
     throw new ApiError(410, "Max clicks reached");
   }
 
-  updateAnalytics(req, url).catch(console.error);
+  updateAnalytics(req, url).catch(() => {});
 
   return res.redirect(url.longUrl);
 });
@@ -155,7 +155,7 @@ const updateUrl = asyncHandler(async (req, res) => {
     throw new ApiError(400, "Invalid URL ID");
   }
 
-  const { longUrl, customAlias, expiresIn } = req.body;
+  const { longUrl, customAlias, expiresIn, maxClicks } = req.body;
   const url = await Url.findById(id);
 
   if (!url) {
@@ -183,6 +183,14 @@ const updateUrl = asyncHandler(async (req, res) => {
     url.expiresAt = new Date(
       url.createdAt.getTime() + expiresIn * 24 * 60 * 60 * 1000,
     );
+  }
+
+  if (maxClicks !== undefined) {
+    if (!Number.isInteger(maxClicks) || maxClicks < -1 || maxClicks === 0) {
+      throw new ApiError(400, "Max clicks must be -1 or a positive integer");
+    }
+
+    url.maxClicks = maxClicks;
   }
 
   if (url.expiresAt && url.expiresAt.getTime() < Date.now()) {
@@ -260,7 +268,36 @@ const deleteShortUrl = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, null, "URL deleted successfully"));
 });
 
-const getUrlStats = asyncHandler(async (req, res) => {
+const batchDeleteUrls = asyncHandler(async (req, res) => {
+  const { ids } = req.body;
+
+  if (!Array.isArray(ids) || ids.length === 0) {
+    throw new ApiError(400, "ids must be a non-empty array");
+  }
+
+  const validIds = ids.filter((id) => mongoose.Types.ObjectId.isValid(id));
+
+  if (validIds.length === 0) {
+    throw new ApiError(400, "No valid URL IDs provided");
+  }
+
+  const result = await Url.deleteMany({
+    _id: { $in: validIds },
+    user: req.user.userId,
+  });
+
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(
+        200,
+        { deletedCount: result.deletedCount },
+        `${result.deletedCount} URL(s) deleted successfully`,
+      ),
+    );
+});
+
+const getOverview = asyncHandler(async (req, res) => {
   const { userId } = req.user;
 
   if (!mongoose.Types.ObjectId.isValid(userId)) {
@@ -269,48 +306,102 @@ const getUrlStats = asyncHandler(async (req, res) => {
 
   const userObjectId = new mongoose.Types.ObjectId(userId);
 
-  const stats = await Url.aggregate([
-    { $match: { user: userObjectId } },
-    {
-      $group: {
-        _id: null,
-        totalUrls: { $sum: 1 },
-        activeUrls: {
-          $sum: {
-            $cond: [
-              {
-                $and: [
-                  { $eq: ["$isActive", true] },
-                  { $gt: ["$expiresAt", "$$NOW"] },
-                ],
-              },
-              1,
-              0,
-            ],
+  // Last 90 days, including today
+  const startDate = new Date();
+  startDate.setUTCHours(0, 0, 0, 0);
+  startDate.setUTCDate(startDate.getUTCDate() - 89);
+
+  const [stats, clicksOverTime, recentUrls] = await Promise.all([
+    Url.aggregate([
+      { $match: { user: userObjectId } },
+      {
+        $group: {
+          _id: null,
+
+          totalUrls: { $sum: 1 },
+
+          activeUrls: {
+            $sum: {
+              $cond: [
+                {
+                  $and: [
+                    { $eq: ["$isActive", true] },
+                    { $gt: ["$expiresAt", "$$NOW"] },
+                  ],
+                },
+                1,
+                0,
+              ],
+            },
           },
-        },
-        inactiveUrls: {
-          $sum: {
-            $cond: [
-              {
-                $and: [
-                  { $eq: ["$isActive", false] },
-                  { $gt: ["$expiresAt", "$$NOW"] },
-                ],
-              },
-              1,
-              0,
-            ],
+
+          inactiveUrls: {
+            $sum: {
+              $cond: [
+                {
+                  $and: [
+                    { $eq: ["$isActive", false] },
+                    { $gt: ["$expiresAt", "$$NOW"] },
+                  ],
+                },
+                1,
+                0,
+              ],
+            },
           },
-        },
-        expiredUrls: {
-          $sum: {
-            $cond: [{ $lt: ["$expiresAt", "$$NOW"] }, 1, 0],
+
+          expiredUrls: {
+            $sum: {
+              $cond: [{ $lt: ["$expiresAt", "$$NOW"] }, 1, 0],
+            },
           },
+
+          totalClicks: { $sum: "$clickCount" },
         },
-        totalClicks: { $sum: "$clickCount" },
       },
-    },
+    ]),
+
+    Analytics.aggregate([
+      {
+        $match: {
+          date: { $gte: startDate },
+        },
+      },
+
+      {
+        $lookup: {
+          from: Url.collection.name,
+          localField: "urlId",
+          foreignField: "_id",
+          as: "url",
+        },
+      },
+
+      {
+        $unwind: "$url",
+      },
+
+      {
+        $match: {
+          "url.user": userObjectId,
+        },
+      },
+
+      {
+        $group: {
+          _id: "$date",
+          clicks: { $sum: "$clicks" },
+        },
+      },
+
+      {
+        $sort: {
+          _id: 1,
+        },
+      },
+    ]),
+
+    Url.find({ user: userObjectId }).sort({ createdAt: -1 }).limit(10),
   ]);
 
   const data = stats[0] ?? {
@@ -321,17 +412,45 @@ const getUrlStats = asyncHandler(async (req, res) => {
     totalClicks: 0,
   };
 
+  // Fill missing dates with 0 clicks
+  const clicksMap = new Map(
+    clicksOverTime.map((item) => [
+      item._id.toISOString().split("T")[0],
+      item.clicks,
+    ]),
+  );
+
+  const clicks = [];
+
+  for (let i = 0; i < 90; i++) {
+    const date = new Date(startDate);
+    date.setUTCDate(startDate.getUTCDate() + i);
+
+    const dateKey = date.toISOString().split("T")[0];
+
+    clicks.push({
+      date: dateKey,
+      clicks: clicksMap.get(dateKey) ?? 0,
+    });
+  }
+
   return res.status(200).json(
     new ApiResponse(
       200,
       {
-        totalUrls: data.totalUrls,
-        activeUrls: data.activeUrls,
-        inactiveUrls: data.inactiveUrls,
-        expiredUrls: data.expiredUrls,
-        totalClicks: data.totalClicks,
+        stats: {
+          totalUrls: data.totalUrls,
+          activeUrls: data.activeUrls,
+          inactiveUrls: data.inactiveUrls,
+          expiredUrls: data.expiredUrls,
+          totalClicks: data.totalClicks,
+        },
+
+        clicksOverTime: clicks,
+
+        recentUrls,
       },
-      "URL stats retrieved successfully",
+      "Overview data retrieved successfully",
     ),
   );
 });
@@ -386,7 +505,21 @@ const updateAnalytics = async (req, url) => {
 };
 
 const getUrlAnalytics = asyncHandler(async (req, res) => {
+  if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+    throw new ApiError(400, "Invalid URL ID");
+  }
+
   const urlId = new mongoose.Types.ObjectId(req.params.id);
+
+  const url = await Url.findById(urlId);
+
+  if (!url) {
+    throw new ApiError(404, "URL not found");
+  }
+
+  if (url.user.toString() !== req.user.userId) {
+    throw new ApiError(403, "Forbidden");
+  }
 
   const startDate = req.query?.startDate
     ? new Date(req.query.startDate)
@@ -600,192 +733,536 @@ const getUrlAnalytics = asyncHandler(async (req, res) => {
     },
   ]);
 
-  res.status(200).json(new ApiResponse(200, analytics));
+  const result = analytics[0] ?? { clicksOverTime: [], breakdown: {} };
+
+  res.status(200).json(
+    new ApiResponse(200, {
+      url,
+      ...result,
+    }),
+  );
 });
 
 const getUserAnalytics = asyncHandler(async (req, res) => {
   const userId = new mongoose.Types.ObjectId(req.user.userId);
-  const startDate = req.query?.startDate ? new Date(req.query.startDate) : null;
-  const endDate = req.query?.endDate ? new Date(req.query.endDate) : null;
 
-  const urls = await Url.find({ user: userId }, { _id: 1 });
+  const startDateQuery = req.query?.startDate
+    ? new Date(req.query.startDate)
+    : null;
+
+  const endDateQuery = req.query?.endDate ? new Date(req.query.endDate) : null;
+
+  // Get all URLs belonging to the user
+  const urls = await Url.find(
+    { user: userId },
+    {
+      _id: 1,
+      createdAt: 1,
+    },
+  )
+    .sort({ createdAt: 1 })
+    .lean();
 
   const urlIds = urls.map((url) => url._id);
 
+  // No URLs
+  if (urls.length === 0) {
+    return res.status(200).json(
+      new ApiResponse(
+        200,
+        {
+          summary: {
+            totalUrls: 0,
+            totalClicks: 0,
+          },
+
+          clicksOverTime: [],
+
+          os: {},
+          browsers: {},
+          referrers: {},
+          countries: {},
+          deviceTypes: {},
+
+          topUrls: [],
+        },
+        "User analytics retrieved successfully",
+      ),
+    );
+  }
+
+  // First link creation date
+  const firstLinkDate = new Date(urls[0].createdAt);
+  firstLinkDate.setUTCHours(0, 0, 0, 0);
+
+  // Today
+  const today = new Date();
+  today.setUTCHours(0, 0, 0, 0);
+
+  const startDate = startDateQuery
+    ? new Date(startDateQuery)
+    : new Date(firstLinkDate);
+
+  const endDate = endDateQuery ? new Date(endDateQuery) : new Date(today);
+
+  startDate.setUTCHours(0, 0, 0, 0);
+  endDate.setUTCHours(0, 0, 0, 0);
+
+  // Invalid date range
+  if (startDate > endDate) {
+    throw new ApiError(400, "Start date cannot be after end date");
+  }
+
   const filter = {
-    urlId: { $in: urlIds },
+    urlId: {
+      $in: urlIds,
+    },
+
+    date: {
+      $gte: startDate,
+      $lte: endDate,
+    },
   };
 
-  if (startDate) filter.date = { $gte: startDate };
-  if (endDate) filter.date = { ...filter.date, $lte: endDate };
-
   const analytics = await Analytics.aggregate([
-    { $match: filter },
+    {
+      $match: filter,
+    },
+
     {
       $facet: {
         summary: [
           {
             $group: {
               _id: null,
-              totalUrls: { $sum: 1 },
-              totalClicks: { $sum: "$clicks" },
+
+              totalClicks: {
+                $sum: "$clicks",
+              },
             },
           },
-          { $project: { _id: 0 } },
+
+          {
+            $project: {
+              _id: 0,
+              totalClicks: 1,
+            },
+          },
         ],
-        clicksOverTime: [{ $project: { _id: 0, date: 1, clicks: 1 } }],
+
+        clicksOverTime: [
+          {
+            $group: {
+              _id: "$date",
+
+              clicks: {
+                $sum: "$clicks",
+              },
+            },
+          },
+
+          {
+            $sort: {
+              _id: 1,
+            },
+          },
+
+          {
+            $project: {
+              _id: 0,
+              date: "$_id",
+              clicks: 1,
+            },
+          },
+        ],
+
         os: [
           {
             $project: {
               _id: 0,
-              os: { $objectToArray: "$os" },
+
+              os: {
+                $objectToArray: "$os",
+              },
             },
           },
-          { $unwind: "$os" },
+
+          {
+            $unwind: "$os",
+          },
+
           {
             $group: {
               _id: "$os.k",
-              count: { $sum: "$os.v" },
+
+              count: {
+                $sum: "$os.v",
+              },
             },
           },
+
           {
-            $group: { _id: null, data: { $push: { k: "$_id", v: "$count" } } },
+            $group: {
+              _id: null,
+
+              data: {
+                $push: {
+                  k: "$_id",
+                  v: "$count",
+                },
+              },
+            },
           },
+
           {
-            $project: { _id: 0, data: { $arrayToObject: "$data" } },
+            $project: {
+              _id: 0,
+
+              data: {
+                $arrayToObject: "$data",
+              },
+            },
           },
         ],
+
         browsers: [
           {
             $project: {
               _id: 0,
-              browsers: { $objectToArray: "$browsers" },
+
+              browsers: {
+                $objectToArray: "$browsers",
+              },
             },
           },
-          { $unwind: "$browsers" },
+
+          {
+            $unwind: "$browsers",
+          },
+
           {
             $group: {
               _id: "$browsers.k",
-              count: { $sum: "$browsers.v" },
+
+              count: {
+                $sum: "$browsers.v",
+              },
             },
           },
+
           {
-            $group: { _id: null, data: { $push: { k: "$_id", v: "$count" } } },
+            $group: {
+              _id: null,
+
+              data: {
+                $push: {
+                  k: "$_id",
+                  v: "$count",
+                },
+              },
+            },
           },
+
           {
-            $project: { _id: 0, data: { $arrayToObject: "$data" } },
+            $project: {
+              _id: 0,
+
+              data: {
+                $arrayToObject: "$data",
+              },
+            },
           },
         ],
+
         referrers: [
           {
             $project: {
               _id: 0,
-              referrers: { $objectToArray: "$referrers" },
+
+              referrers: {
+                $objectToArray: "$referrers",
+              },
             },
           },
-          { $unwind: "$referrers" },
+
+          {
+            $unwind: "$referrers",
+          },
+
           {
             $group: {
               _id: "$referrers.k",
-              count: { $sum: "$referrers.v" },
+
+              count: {
+                $sum: "$referrers.v",
+              },
             },
           },
+
           {
-            $group: { _id: null, data: { $push: { k: "$_id", v: "$count" } } },
+            $group: {
+              _id: null,
+
+              data: {
+                $push: {
+                  k: "$_id",
+                  v: "$count",
+                },
+              },
+            },
           },
+
           {
-            $project: { _id: 0, data: { $arrayToObject: "$data" } },
+            $project: {
+              _id: 0,
+
+              data: {
+                $arrayToObject: "$data",
+              },
+            },
           },
         ],
+
         countries: [
           {
             $project: {
               _id: 0,
-              countries: { $objectToArray: "$countries" },
+
+              countries: {
+                $objectToArray: "$countries",
+              },
             },
           },
-          { $unwind: "$countries" },
+
+          {
+            $unwind: "$countries",
+          },
+
           {
             $group: {
               _id: "$countries.k",
-              count: { $sum: "$countries.v" },
+
+              count: {
+                $sum: "$countries.v",
+              },
             },
           },
+
           {
-            $group: { _id: null, data: { $push: { k: "$_id", v: "$count" } } },
+            $group: {
+              _id: null,
+
+              data: {
+                $push: {
+                  k: "$_id",
+                  v: "$count",
+                },
+              },
+            },
           },
+
           {
-            $project: { _id: 0, data: { $arrayToObject: "$data" } },
+            $project: {
+              _id: 0,
+
+              data: {
+                $arrayToObject: "$data",
+              },
+            },
           },
         ],
+
         deviceTypes: [
           {
             $project: {
               _id: 0,
-              deviceTypes: { $objectToArray: "$deviceTypes" },
+
+              deviceTypes: {
+                $objectToArray: "$deviceTypes",
+              },
             },
           },
-          { $unwind: "$deviceTypes" },
+
+          {
+            $unwind: "$deviceTypes",
+          },
+
           {
             $group: {
               _id: "$deviceTypes.k",
-              count: { $sum: "$deviceTypes.v" },
+
+              count: {
+                $sum: "$deviceTypes.v",
+              },
             },
           },
+
           {
-            $group: { _id: null, data: { $push: { k: "$_id", v: "$count" } } },
+            $group: {
+              _id: null,
+
+              data: {
+                $push: {
+                  k: "$_id",
+                  v: "$count",
+                },
+              },
+            },
           },
+
           {
-            $project: { _id: 0, data: { $arrayToObject: "$data" } },
+            $project: {
+              _id: 0,
+
+              data: {
+                $arrayToObject: "$data",
+              },
+            },
           },
         ],
+
         topUrls: [
           {
             $group: {
               _id: "$urlId",
-              clicks: { $sum: "$clicks" },
+
+              clicks: {
+                $sum: "$clicks",
+              },
             },
           },
-          { $sort: { clicks: -1 } },
-          { $limit: 5 },
+
+          {
+            $sort: {
+              clicks: -1,
+            },
+          },
+
+          {
+            $limit: 5,
+          },
+
           {
             $lookup: {
               from: "urls",
+
               localField: "_id",
+
               foreignField: "_id",
+
               as: "url",
             },
           },
-          { $unwind: "$url" },
+
+          {
+            $unwind: "$url",
+          },
+
           {
             $project: {
               _id: 0,
+
               urlId: "$_id",
+
               clicks: 1,
+
               shortCode: "$url.shortCode",
+
               longUrl: "$url.longUrl",
+
               customAlias: "$url.customAlias",
             },
           },
         ],
       },
     },
+
     {
       $project: {
         _id: 0,
-        summary: { $arrayElemAt: ["$summary", 0] },
+
+        summary: {
+          $arrayElemAt: ["$summary", 0],
+        },
+
         clicksOverTime: 1,
-        os: { $arrayElemAt: ["$os.data", 0] },
-        browsers: { $arrayElemAt: ["$browsers.data", 0] },
-        referrers: { $arrayElemAt: ["$referrers.data", 0] },
-        countries: { $arrayElemAt: ["$countries.data", 0] },
-        deviceTypes: { $arrayElemAt: ["$deviceTypes.data", 0] },
+
+        os: {
+          $arrayElemAt: ["$os.data", 0],
+        },
+
+        browsers: {
+          $arrayElemAt: ["$browsers.data", 0],
+        },
+
+        referrers: {
+          $arrayElemAt: ["$referrers.data", 0],
+        },
+
+        countries: {
+          $arrayElemAt: ["$countries.data", 0],
+        },
+
+        deviceTypes: {
+          $arrayElemAt: ["$deviceTypes.data", 0],
+        },
+
         topUrls: 1,
       },
     },
   ]);
 
-  res.status(200).json(new ApiResponse(200, analytics[0]));
+  const data = analytics[0] || {};
+
+  const clicksMap = new Map(
+    (data.clicksOverTime || []).map((item) => [
+      new Date(item.date).toISOString().split("T")[0],
+      item.clicks,
+    ]),
+  );
+
+  const clicksOverTime = [];
+
+  const currentDate = new Date(startDate);
+
+  while (currentDate <= endDate) {
+    const dateKey = currentDate.toISOString().split("T")[0];
+
+    clicksOverTime.push({
+      date: dateKey,
+      clicks: clicksMap.get(dateKey) ?? 0,
+    });
+
+    currentDate.setUTCDate(currentDate.getUTCDate() + 1);
+  }
+
+  return res.status(200).json(
+    new ApiResponse(
+      200,
+      {
+        summary: {
+          totalUrls: urls.length,
+          totalClicks: data.summary?.totalClicks ?? 0,
+        },
+
+        clicksOverTime,
+
+        os: data.os || {},
+
+        browsers: data.browsers || {},
+
+        referrers: data.referrers || {},
+
+        countries: data.countries || {},
+
+        deviceTypes: data.deviceTypes || {},
+
+        topUrls: data.topUrls || [],
+      },
+
+      "User analytics retrieved successfully",
+    ),
+  );
 });
 
 const validateUrl = (url) => {
@@ -886,7 +1363,8 @@ export {
   updateUrl,
   toggleStatus,
   deleteShortUrl,
-  getUrlStats,
+  batchDeleteUrls,
+  getOverview,
   getUrlAnalytics,
   getUserAnalytics,
 };
