@@ -14,9 +14,8 @@ const AuthProvider = ({ children }) => {
       });
 
       setUser(res.data.data);
-    } catch (e) {
+    } catch {
       setUser(null);
-      console.log(e.message);
     } finally {
       setLoading(false);
     }

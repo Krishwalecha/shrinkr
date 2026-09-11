@@ -6,9 +6,13 @@ import Loader from "@/components/loader.jsx";
 import { Eye, EyeOff, ChevronLeft } from "lucide-react";
 import { toast } from "sonner";
 import api from "@/lib/api";
+import { useTheme } from "@/context/ThemeContext";
 
 const SignUp = () => {
   const navigate = useNavigate();
+  const { resolvedTheme } = useTheme();
+
+  const isDark = resolvedTheme === "dark";
 
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
@@ -75,26 +79,44 @@ const SignUp = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#131416] p-3 text-white">
-      <div className="grid min-h-[calc(100vh-24px)] overflow-hidden rounded-2xl border border-white/10 xl:grid-cols-2">
-        {/* Image */}
+    <div
+      className={`min-h-screen p-3 ${
+        isDark ? "bg-[#131416] text-white" : "bg-[#f7f9fd] text-[#111827]"
+      }`}
+    >
+      <div
+        className={`grid min-h-[calc(100vh-24px)] overflow-hidden rounded-2xl border xl:grid-cols-2 ${
+          isDark ? "border-white/10" : "border-[#dce5f2]"
+        }`}
+      >
         <div
           className="hidden bg-cover bg-center xl:block"
           style={{ backgroundImage: `url(${authBg})` }}
         />
 
-        {/* Form */}
-        <div className="flex min-h-full flex-col bg-[#111214] p-6 md:px-10 md:py-8">
-          <div>
+        <div
+          className={`flex min-h-full flex-col p-6 md:px-10 md:py-8 ${
+            isDark ? "bg-[#111214]" : "bg-white"
+          }`}
+        >
+          <div className="flex items-center">
             <button
               type="button"
               onClick={() => navigate("/")}
-              className="flex size-8 cursor-pointer items-center justify-center rounded-lg text-white/60 transition-colors duration-150 hover:bg-white/5 hover:text-white"
+              className={`flex size-8 shrink-0 cursor-pointer items-center justify-center rounded-lg transition-colors duration-150 ${
+                isDark
+                  ? "text-white/60 hover:bg-white/5 hover:text-white"
+                  : "text-[#71809a] hover:bg-[#edf3ff] hover:text-[#111827]"
+              }`}
             >
               <ChevronLeft size={18} strokeWidth={1.5} />
             </button>
 
-            <div className="mt-3 text-xl font-semibold tracking-tight">
+            <div
+              className={`ml-3 text-xl font-semibold tracking-tight ${
+                isDark ? "text-white" : "text-[#111827]"
+              }`}
+            >
               shrinkr.
             </div>
           </div>
@@ -102,52 +124,100 @@ const SignUp = () => {
           <div className="flex flex-1 items-center justify-center py-8">
             <div className="w-full max-w-md">
               <div className="text-center">
-                <h1 className="text-3xl font-medium tracking-[-0.04em]">
+                <h1
+                  className={`text-3xl font-medium tracking-[-0.04em] ${
+                    isDark ? "text-white" : "text-[#111827]"
+                  }`}
+                >
                   Welcome!
                 </h1>
 
-                <p className="mt-2 text-sm text-white/45">
+                <p
+                  className={`mt-2 text-sm ${
+                    isDark ? "text-white/45" : "text-[#71809a]"
+                  }`}
+                >
                   Sign up for URL history and detailed analytics.
                 </p>
               </div>
 
               <div className="mt-7 flex flex-col gap-2">
-                <div className="overflow-hidden rounded-xl border border-white/20 bg-black">
+                <div
+                  className={`overflow-hidden rounded-xl border ${
+                    isDark
+                      ? "border-white/20 bg-black"
+                      : "border-[#dce5f2] bg-[#f7f9fd]"
+                  }`}
+                >
                   <input
                     type="text"
                     placeholder="Enter your full name"
-                    className="w-full bg-transparent px-4 py-3 text-sm text-white outline-none placeholder:text-white/30 md:text-base"
+                    className={`w-full bg-transparent px-4 py-3 text-sm outline-none md:text-base ${
+                      isDark
+                        ? "text-white placeholder:text-white/30"
+                        : "text-[#111827] placeholder:text-[#71809a]"
+                    }`}
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     autoFocus
                   />
                 </div>
 
-                <div className="overflow-hidden rounded-xl border border-white/20 bg-black">
+                <div
+                  className={`overflow-hidden rounded-xl border ${
+                    isDark
+                      ? "border-white/20 bg-black"
+                      : "border-[#dce5f2] bg-[#f7f9fd]"
+                  }`}
+                >
                   <input
                     type="text"
                     placeholder="Enter your username"
-                    className="w-full bg-transparent px-4 py-3 text-sm text-white outline-none placeholder:text-white/30 md:text-base"
+                    className={`w-full bg-transparent px-4 py-3 text-sm outline-none md:text-base ${
+                      isDark
+                        ? "text-white placeholder:text-white/30"
+                        : "text-[#111827] placeholder:text-[#71809a]"
+                    }`}
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
                   />
                 </div>
 
-                <div className="overflow-hidden rounded-xl border border-white/20 bg-black">
+                <div
+                  className={`overflow-hidden rounded-xl border ${
+                    isDark
+                      ? "border-white/20 bg-black"
+                      : "border-[#dce5f2] bg-[#f7f9fd]"
+                  }`}
+                >
                   <input
                     type="email"
                     placeholder="Enter your email"
-                    className="w-full bg-transparent px-4 py-3 text-sm text-white outline-none placeholder:text-white/30 md:text-base"
+                    className={`w-full bg-transparent px-4 py-3 text-sm outline-none md:text-base ${
+                      isDark
+                        ? "text-white placeholder:text-white/30"
+                        : "text-[#111827] placeholder:text-[#71809a]"
+                    }`}
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                   />
                 </div>
 
-                <div className="flex items-center overflow-hidden rounded-xl border border-white/20 bg-black">
+                <div
+                  className={`flex items-center overflow-hidden rounded-xl border ${
+                    isDark
+                      ? "border-white/20 bg-black"
+                      : "border-[#dce5f2] bg-[#f7f9fd]"
+                  }`}
+                >
                   <input
                     type={showPassword ? "text" : "password"}
                     placeholder="Enter your password"
-                    className="min-w-0 flex-1 bg-transparent px-4 py-3 text-sm text-white outline-none placeholder:text-white/30 md:text-base"
+                    className={`min-w-0 flex-1 bg-transparent px-4 py-3 text-sm outline-none md:text-base ${
+                      isDark
+                        ? "text-white placeholder:text-white/30"
+                        : "text-[#111827] placeholder:text-[#71809a]"
+                    }`}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                   />
@@ -155,7 +225,11 @@ const SignUp = () => {
                   <button
                     type="button"
                     onClick={() => setShowPassword((prev) => !prev)}
-                    className="flex size-9 shrink-0 cursor-pointer items-center justify-center rounded-lg text-white/40 transition-colors hover:text-white/80"
+                    className={`flex size-9 shrink-0 cursor-pointer items-center justify-center rounded-lg transition-colors ${
+                      isDark
+                        ? "text-white/40 hover:text-white/80"
+                        : "text-[#71809a] hover:text-[#111827]"
+                    }`}
                   >
                     {showPassword ? (
                       <EyeOff strokeWidth={1.5} size={19} />
@@ -168,35 +242,59 @@ const SignUp = () => {
                     type="button"
                     onClick={handleSignUp}
                     disabled={isLoading}
-                    className="m-1 flex h-9 min-w-[82px] shrink-0 cursor-pointer items-center justify-center rounded-lg bg-white px-4 text-sm font-medium text-black transition-colors duration-150 hover:bg-white/90 disabled:cursor-not-allowed disabled:opacity-70"
+                    className="m-1 flex h-9 min-w-[82px] shrink-0 cursor-pointer items-center justify-center rounded-lg bg-primary px-4 text-sm font-medium text-primary-foreground transition-colors duration-150 hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-70"
                   >
                     {isLoading ? <Loader /> : "Sign Up"}
                   </button>
                 </div>
               </div>
 
-              <p className="mt-4 text-center text-sm text-white/70">
+              <p
+                className={`mt-4 text-center text-sm ${
+                  isDark ? "text-white/70" : "text-[#71809a]"
+                }`}
+              >
                 Already have an account?{" "}
                 <Link
                   to="/signin"
-                  className="text-white underline underline-offset-4"
+                  className={`underline underline-offset-4 ${
+                    isDark ? "text-white" : "text-[#111827]"
+                  }`}
                 >
                   Sign in
                 </Link>
               </p>
 
               <div className="my-6 flex items-center gap-4">
-                <div className="h-px flex-1 bg-white/10" />
+                <div
+                  className={`h-px flex-1 ${
+                    isDark ? "bg-white/10" : "bg-[#dce5f2]"
+                  }`}
+                />
 
-                <span className="text-[10px] text-white/30">OR</span>
+                <span
+                  className={`text-[10px] ${
+                    isDark ? "text-white/30" : "text-[#71809a]"
+                  }`}
+                >
+                  OR
+                </span>
 
-                <div className="h-px flex-1 bg-white/10" />
+                <div
+                  className={`h-px flex-1 ${
+                    isDark ? "bg-white/10" : "bg-[#dce5f2]"
+                  }`}
+                />
               </div>
 
               <div className="space-y-2">
                 <button
                   type="button"
-                  className="flex h-11 w-full cursor-pointer items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[0.04] text-sm text-white/75 transition-colors duration-150 hover:bg-white/[0.07] hover:text-white"
+                  className={`flex h-11 w-full cursor-pointer items-center justify-center gap-2 rounded-xl border text-sm transition-colors duration-150 ${
+                    isDark
+                      ? "border-white/10 bg-white/[0.04] text-white/75 hover:bg-white/[0.07] hover:text-white"
+                      : "border-[#dce5f2] bg-[#f1f5fb] text-[#71809a] hover:bg-[#edf3ff] hover:text-[#111827]"
+                  }`}
                 >
                   <FaGoogle size={14} />
                   Sign up with Google
@@ -204,7 +302,11 @@ const SignUp = () => {
 
                 <button
                   type="button"
-                  className="flex h-11 w-full cursor-pointer items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[0.04] text-sm text-white/75 transition-colors duration-150 hover:bg-white/[0.07] hover:text-white"
+                  className={`flex h-11 w-full cursor-pointer items-center justify-center gap-2 rounded-xl border text-sm transition-colors duration-150 ${
+                    isDark
+                      ? "border-white/10 bg-white/[0.04] text-white/75 hover:bg-white/[0.07] hover:text-white"
+                      : "border-[#dce5f2] bg-[#f1f5fb] text-[#71809a] hover:bg-[#edf3ff] hover:text-[#111827]"
+                  }`}
                 >
                   <FaGithub size={14} />
                   Sign up with GitHub
@@ -213,15 +315,16 @@ const SignUp = () => {
             </div>
           </div>
 
-          <div className="flex items-center justify-between text-xs text-white/30">
-            <Link to="/terms" className="transition-colors hover:text-white/60">
+          <div
+            className={`flex items-center justify-between text-xs ${
+              isDark ? "text-white/30" : "text-[#71809a]"
+            }`}
+          >
+            <Link to="/terms" className="transition-colors hover:opacity-70">
               Terms of Service
             </Link>
 
-            <Link
-              to="/privacy"
-              className="transition-colors hover:text-white/60"
-            >
+            <Link to="/privacy" className="transition-colors hover:opacity-70">
               Privacy Policy
             </Link>
           </div>
