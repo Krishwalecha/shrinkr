@@ -46,6 +46,7 @@ const Signin = () => {
 
       if (res?.data?.success) {
         toast.success("Logged in successfully, redirecting...");
+
         setUser(res.data.data);
 
         setTimeout(() => {
@@ -53,6 +54,22 @@ const Signin = () => {
         }, 2000);
       }
     }
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+
+    if (step === 1) {
+      if (!identifier.trim()) {
+        toast.error("Please enter a valid email or username");
+        return;
+      }
+
+      setStep(2);
+      return;
+    }
+
+    handleLogin();
   };
 
   return (
@@ -118,7 +135,7 @@ const Signin = () => {
                 </p>
               </div>
 
-              <div className="mt-7">
+              <form className="mt-7" onSubmit={handleSubmit}>
                 {step === 1 ? (
                   <div
                     className={`flex overflow-hidden rounded-xl border ${
@@ -130,6 +147,7 @@ const Signin = () => {
                     <input
                       type="text"
                       placeholder="Enter your username or email"
+                      autoComplete="username"
                       className={`min-w-0 flex-1 bg-transparent px-4 py-3 text-sm outline-none md:text-base ${
                         isDark
                           ? "text-white placeholder:text-white/30"
@@ -141,14 +159,7 @@ const Signin = () => {
                     />
 
                     <button
-                      type="button"
-                      onClick={() =>
-                        identifier.trim()
-                          ? setStep(2)
-                          : toast.error(
-                              "Please enter a valid email or username",
-                            )
-                      }
+                      type="submit"
                       className="m-1 shrink-0 cursor-pointer rounded-lg bg-primary px-4 text-sm font-medium text-primary-foreground transition-colors duration-150 hover:opacity-90"
                     >
                       Continue
@@ -166,6 +177,7 @@ const Signin = () => {
                       <input
                         type="text"
                         placeholder="Enter your username or email"
+                        autoComplete="username"
                         className={`w-full bg-transparent px-4 py-3 text-sm outline-none md:text-base ${
                           isDark
                             ? "text-white placeholder:text-white/30"
@@ -186,6 +198,7 @@ const Signin = () => {
                       <input
                         type={showPassword ? "text" : "password"}
                         placeholder="Enter your password"
+                        autoComplete="current-password"
                         className={`min-w-0 flex-1 bg-transparent px-4 py-3 text-sm outline-none md:text-base ${
                           isDark
                             ? "text-white placeholder:text-white/30"
@@ -213,8 +226,7 @@ const Signin = () => {
                       </button>
 
                       <button
-                        type="button"
-                        onClick={handleLogin}
+                        type="submit"
                         disabled={isLoading}
                         className="m-1 flex h-9 min-w-[82px] shrink-0 cursor-pointer items-center justify-center rounded-lg bg-primary px-4 text-sm font-medium text-primary-foreground transition-colors duration-150 hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-70"
                       >
@@ -223,70 +235,70 @@ const Signin = () => {
                     </div>
                   </div>
                 )}
+              </form>
 
-                <p
-                  className={`mt-4 text-center text-sm ${
-                    isDark ? "text-white/70" : "text-[#71809a]"
+              <p
+                className={`mt-4 text-center text-sm ${
+                  isDark ? "text-white/70" : "text-[#71809a]"
+                }`}
+              >
+                Don't have an account?{" "}
+                <Link
+                  to="/signup"
+                  className={`underline underline-offset-4 ${
+                    isDark ? "text-white" : "text-[#111827]"
                   }`}
                 >
-                  Don't have an account?{" "}
-                  <Link
-                    to="/signup"
-                    className={`underline underline-offset-4 ${
-                      isDark ? "text-white" : "text-[#111827]"
-                    }`}
-                  >
-                    Sign up
-                  </Link>
-                </p>
+                  Sign up
+                </Link>
+              </p>
 
-                <div className="my-6 flex items-center gap-4">
-                  <div
-                    className={`h-px flex-1 ${
-                      isDark ? "bg-white/10" : "bg-[#dce5f2]"
-                    }`}
-                  />
+              <div className="my-6 flex items-center gap-4">
+                <div
+                  className={`h-px flex-1 ${
+                    isDark ? "bg-white/10" : "bg-[#dce5f2]"
+                  }`}
+                />
 
-                  <span
-                    className={`text-[10px] ${
-                      isDark ? "text-white/30" : "text-[#71809a]"
-                    }`}
-                  >
-                    OR
-                  </span>
+                <span
+                  className={`text-[10px] ${
+                    isDark ? "text-white/30" : "text-[#71809a]"
+                  }`}
+                >
+                  OR
+                </span>
 
-                  <div
-                    className={`h-px flex-1 ${
-                      isDark ? "bg-white/10" : "bg-[#dce5f2]"
-                    }`}
-                  />
-                </div>
+                <div
+                  className={`h-px flex-1 ${
+                    isDark ? "bg-white/10" : "bg-[#dce5f2]"
+                  }`}
+                />
+              </div>
 
-                <div className="space-y-2">
-                  <button
-                    type="button"
-                    className={`flex h-11 w-full cursor-pointer items-center justify-center gap-2 rounded-xl border text-sm transition-colors duration-150 ${
-                      isDark
-                        ? "border-white/10 bg-white/[0.04] text-white/75 hover:bg-white/[0.07] hover:text-white"
-                        : "border-[#dce5f2] bg-[#f1f5fb] text-[#71809a] hover:bg-[#edf3ff] hover:text-[#111827]"
-                    }`}
-                  >
-                    <FaGoogle size={14} />
-                    Sign in with Google
-                  </button>
+              <div className="space-y-2">
+                <button
+                  type="button"
+                  className={`flex h-11 w-full cursor-pointer items-center justify-center gap-2 rounded-xl border text-sm transition-colors duration-150 ${
+                    isDark
+                      ? "border-white/10 bg-white/[0.04] text-white/75 hover:bg-white/[0.07] hover:text-white"
+                      : "border-[#dce5f2] bg-[#f1f5fb] text-[#71809a] hover:bg-[#edf3ff] hover:text-[#111827]"
+                  }`}
+                >
+                  <FaGoogle size={14} />
+                  Sign in with Google
+                </button>
 
-                  <button
-                    type="button"
-                    className={`flex h-11 w-full cursor-pointer items-center justify-center gap-2 rounded-xl border text-sm transition-colors duration-150 ${
-                      isDark
-                        ? "border-white/10 bg-white/[0.04] text-white/75 hover:bg-white/[0.07] hover:text-white"
-                        : "border-[#dce5f2] bg-[#f1f5fb] text-[#71809a] hover:bg-[#edf3ff] hover:text-[#111827]"
-                    }`}
-                  >
-                    <FaGithub size={14} />
-                    Sign in with GitHub
-                  </button>
-                </div>
+                <button
+                  type="button"
+                  className={`flex h-11 w-full cursor-pointer items-center justify-center gap-2 rounded-xl border text-sm transition-colors duration-150 ${
+                    isDark
+                      ? "border-white/10 bg-white/[0.04] text-white/75 hover:bg-white/[0.07] hover:text-white"
+                      : "border-[#dce5f2] bg-[#f1f5fb] text-[#71809a] hover:bg-[#edf3ff] hover:text-[#111827]"
+                  }`}
+                >
+                  <FaGithub size={14} />
+                  Sign in with GitHub
+                </button>
               </div>
             </div>
           </div>

@@ -78,6 +78,11 @@ const SignUp = () => {
     }
   };
 
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    handleSignUp();
+  };
+
   return (
     <div
       className={`min-h-screen p-3 ${
@@ -141,7 +146,10 @@ const SignUp = () => {
                 </p>
               </div>
 
-              <div className="mt-7 flex flex-col gap-2">
+              <form
+                className="mt-7 flex flex-col gap-2"
+                onSubmit={handleSubmit}
+              >
                 <div
                   className={`overflow-hidden rounded-xl border ${
                     isDark
@@ -152,6 +160,7 @@ const SignUp = () => {
                   <input
                     type="text"
                     placeholder="Enter your full name"
+                    autoComplete="name"
                     className={`w-full bg-transparent px-4 py-3 text-sm outline-none md:text-base ${
                       isDark
                         ? "text-white placeholder:text-white/30"
@@ -173,6 +182,7 @@ const SignUp = () => {
                   <input
                     type="text"
                     placeholder="Enter your username"
+                    autoComplete="username"
                     className={`w-full bg-transparent px-4 py-3 text-sm outline-none md:text-base ${
                       isDark
                         ? "text-white placeholder:text-white/30"
@@ -193,6 +203,7 @@ const SignUp = () => {
                   <input
                     type="email"
                     placeholder="Enter your email"
+                    autoComplete="email"
                     className={`w-full bg-transparent px-4 py-3 text-sm outline-none md:text-base ${
                       isDark
                         ? "text-white placeholder:text-white/30"
@@ -213,6 +224,7 @@ const SignUp = () => {
                   <input
                     type={showPassword ? "text" : "password"}
                     placeholder="Enter your password"
+                    autoComplete="new-password"
                     className={`min-w-0 flex-1 bg-transparent px-4 py-3 text-sm outline-none md:text-base ${
                       isDark
                         ? "text-white placeholder:text-white/30"
@@ -239,15 +251,14 @@ const SignUp = () => {
                   </button>
 
                   <button
-                    type="button"
-                    onClick={handleSignUp}
+                    type="submit"
                     disabled={isLoading}
                     className="m-1 flex h-9 min-w-[82px] shrink-0 cursor-pointer items-center justify-center rounded-lg bg-primary px-4 text-sm font-medium text-primary-foreground transition-colors duration-150 hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-70"
                   >
                     {isLoading ? <Loader /> : "Sign Up"}
                   </button>
                 </div>
-              </div>
+              </form>
 
               <p
                 className={`mt-4 text-center text-sm ${
