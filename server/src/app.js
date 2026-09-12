@@ -20,4 +20,8 @@ app.use("/api/v1/users", userRouter);
 
 app.use(errorHandler);
 
+app.get("/health", (req, res) => {
+  res.status(200).json({ status: "ok" });
+});
+
 export default app;
