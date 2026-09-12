@@ -1,7 +1,6 @@
 "use client";
 
 import * as React from "react";
-
 import {
   BarChart3Icon,
   CheckIcon,
@@ -9,6 +8,7 @@ import {
   MoreHorizontalIcon,
   PencilIcon,
   PowerIcon,
+  QrCodeIcon,
   Trash2Icon,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -16,10 +16,13 @@ import { toast } from "sonner";
 
 import api from "@/lib/api";
 import { getStatusBadgeClass } from "@/lib/status";
+
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+
 import { EditLinkSheet } from "@/components/dashboard/shared/edit-link-sheet";
 import { DeleteLinkDialog } from "@/components/dashboard/shared/delete-link-dialog";
+import { QRCodeDialog } from "@/components/dashboard/shared/qr-code-dialog";
 
 import {
   DropdownMenu,
@@ -40,9 +43,11 @@ import {
 
 export function DataTable({ data = [], onRefresh }) {
   const navigate = useNavigate();
+
   const [copiedId, setCopiedId] = React.useState(null);
   const [editingUrl, setEditingUrl] = React.useState(null);
   const [deletingUrl, setDeletingUrl] = React.useState(null);
+  const [qrUrl, setQrUrl] = React.useState(null);
   const [togglingId, setTogglingId] = React.useState(null);
 
   const getShortUrl = (url) => {
@@ -113,6 +118,7 @@ export function DataTable({ data = [], onRefresh }) {
       toast.success(
         res.data.data.isActive ? "Link activated" : "Link deactivated",
       );
+
       onRefresh?.();
     } catch (error) {
       toast.error(
@@ -167,9 +173,7 @@ export function DataTable({ data = [], onRefresh }) {
             {data.length > 0 ? (
               data.map((url) => {
                 const shortUrl = getShortUrl(url);
-
                 const displayUrl = getDisplayUrl(url.longUrl);
-
                 const status = getStatus(url);
 
                 return (
@@ -255,6 +259,11 @@ export function DataTable({ data = [], onRefresh }) {
                             Analytics
                           </DropdownMenuItem>
 
+                          <DropdownMenuItem onClick={() => setQrUrl(url)}>
+                            <QrCodeIcon />
+                            QR Code
+                          </DropdownMenuItem>
+
                           <DropdownMenuItem onClick={() => setEditingUrl(url)}>
                             <PencilIcon />
                             Edit
@@ -309,6 +318,12 @@ export function DataTable({ data = [], onRefresh }) {
         open={!!deletingUrl}
         onOpenChange={(open) => !open && setDeletingUrl(null)}
         onDeleted={onRefresh}
+      />
+
+      <QRCodeDialog
+        url={qrUrl}
+        open={!!qrUrl}
+        onOpenChange={(open) => !open && setQrUrl(null)}
       />
     </div>
   );

@@ -1,108 +1,159 @@
-import {
-  CartesianGrid,
-  Line,
-  LineChart,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from "recharts";
+"use client";
+
+import * as React from "react";
+import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from "recharts";
 
 import {
   Card,
+  CardAction,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
 
+import {
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+} from "@/components/ui/chart";
+
 export function AnalyticsChart({
-  data,
-  rangeLabel,
+  data = [],
+  rangeLabel = "All time",
   formatDate,
   formatFullDate,
-  totalClicks,
 }) {
+  const chartConfig = {
+    clicks: {
+      label: "Clicks",
+      color: "var(--primary)",
+    },
+  };
+
+  // Calculate from the exact data being displayed in the chart.
+  const totalClicks = React.useMemo(
+    () => data.reduce((total, item) => total + Number(item.clicks ?? 0), 0),
+    [data],
+  );
+
   return (
-    <Card>
+    <Card className="@container/card border-border/80 bg-card shadow-none">
       <CardHeader>
-        <div className="flex items-start justify-between gap-4">
-          <div>
-            <CardTitle>Clicks Over Time</CardTitle>
+        <CardTitle>Clicks Over Time</CardTitle>
 
-            <CardDescription>Daily clicks · {rangeLabel}</CardDescription>
+        <CardDescription>
+          <span className="hidden @[540px]/card:block">
+            Total clicks for the {rangeLabel.toLowerCase()}
+          </span>
+
+          <span className="@[540px]/card:hidden">{rangeLabel}</span>
+        </CardDescription>
+
+        <CardAction>
+          <div className="text-sm font-medium text-muted-foreground">
+            {totalClicks.toLocaleString()} clicks
           </div>
-
-          {totalClicks !== undefined && (
-            <div className="text-right">
-              <p className="text-2xl font-semibold tabular-nums text-foreground">
-                {totalClicks}
-              </p>
-
-              <p className="text-xs text-muted-foreground">total clicks</p>
-            </div>
-          )}
-        </div>
+        </CardAction>
       </CardHeader>
 
-      <CardContent>
-        {data.length === 0 ? (
-          <div className="flex h-[300px] items-center justify-center text-sm text-muted-foreground">
-            No click data available.
-          </div>
-        ) : (
-          <div className="h-[300px] w-full">
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart
-                data={data}
-                margin={{
-                  top: 10,
-                  right: 12,
-                  left: 0,
-                  bottom: 0,
-                }}
+      <CardContent className="px-2 pt-4 sm:px-6 sm:pt-6">
+        <ChartContainer config={chartConfig} className="h-[250px] w-full">
+          <AreaChart
+            data={data}
+            margin={{
+              top: 8,
+              right: 12,
+              left: 0,
+              bottom: 0,
+            }}
+          >
+            <defs>
+              <linearGradient
+                id="fillAnalyticsClicks"
+                x1="0"
+                y1="0"
+                x2="0"
+                y2="1"
               >
-                <CartesianGrid vertical={false} strokeDasharray="3 3" />
-
-                <XAxis
-                  dataKey="date"
-                  tickLine={false}
-                  axisLine={false}
-                  tickMargin={10}
-                  minTickGap={40}
-                  tickFormatter={formatDate}
+                <stop
+                  offset="5%"
+                  stopColor="var(--color-clicks)"
+                  stopOpacity={0.18}
                 />
 
-                <YAxis
-                  allowDecimals={false}
-                  domain={[0, "auto"]}
-                  axisLine={false}
-                  tickLine={false}
-                  width={40}
+                <stop
+                  offset="95%"
+                  stopColor="var(--color-clicks)"
+                  stopOpacity={0.01}
                 />
+              </linearGradient>
+            </defs>
 
-                <Tooltip
-                  cursor={{
-                    strokeDasharray: "3 3",
-                  }}
-                  labelFormatter={formatFullDate}
-                  formatter={(value) => [value, "Clicks"]}
-                />
+            <CartesianGrid
+              vertical={false}
+              strokeDasharray="3 3"
+              className="stroke-border/70"
+            />
 
-                <Line
-                  type="monotone"
-                  dataKey="clicks"
-                  stroke="var(--primary)"
-                  strokeWidth={2}
-                  dot={false}
-                  activeDot={{
-                    r: 5,
-                  }}
+            <YAxis
+              allowDecimals={false}
+              axisLine={false}
+              tickLine={false}
+              width={35}
+              domain={[0, "auto"]}
+              className="fill-muted-foreground"
+            />
+
+            <XAxis
+              dataKey="date"
+              tickLine={false}
+              axisLine={false}
+              tickMargin={8}
+              minTickGap={32}
+              className="fill-muted-foreground"
+              tickFormatter={(value) =>
+                formatDate
+                  ? formatDate(value)
+                  : new Date(`${value}T00:00:00Z`).toLocaleDateString("en-IN", {
+                      month: "short",
+                      day: "numeric",
+                    })
+              }
+            />
+
+            <ChartTooltip
+              cursor={false}
+              content={
+                <ChartTooltipContent
+                  indicator="dot"
+                  labelFormatter={(value) =>
+                    formatFullDate
+                      ? formatFullDate(value)
+                      : new Date(`${value}T00:00:00Z`).toLocaleDateString(
+                          "en-IN",
+                          {
+                            month: "short",
+                            day: "numeric",
+                            year: "numeric",
+                          },
+                        )
+                  }
                 />
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
-        )}
+              }
+            />
+
+            <Area
+              dataKey="clicks"
+              type="monotone"
+              fill="url(#fillAnalyticsClicks)"
+              stroke="var(--color-clicks)"
+              strokeWidth={2}
+              dot={false}
+              activeDot={{ r: 4 }}
+            />
+          </AreaChart>
+        </ChartContainer>
       </CardContent>
     </Card>
   );

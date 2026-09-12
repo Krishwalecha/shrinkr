@@ -6,6 +6,7 @@ import {
   MoreHorizontalIcon,
   PencilIcon,
   PowerIcon,
+  QrCodeIcon,
   Trash2Icon,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -13,11 +14,14 @@ import { toast } from "sonner";
 
 import api from "@/lib/api";
 import { getStatusBadgeClass } from "@/lib/status";
+
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
+
 import { EditLinkSheet } from "@/components/dashboard/shared/edit-link-sheet";
 import { DeleteLinkDialog } from "@/components/dashboard/shared/delete-link-dialog";
+import { QRCodeDialog } from "@/components/dashboard/shared/qr-code-dialog";
 
 import {
   DropdownMenu,
@@ -45,13 +49,18 @@ export function HistoryTable({
   onToggleSelectAll,
 }) {
   const navigate = useNavigate();
+
   const [copiedId, setCopiedId] = React.useState(null);
   const [editingUrl, setEditingUrl] = React.useState(null);
   const [deletingUrl, setDeletingUrl] = React.useState(null);
+  const [qrUrl, setQrUrl] = React.useState(null);
   const [togglingId, setTogglingId] = React.useState(null);
 
-  const allSelected = urls.length > 0 && urls.every((url) => selectedIds.has(url._id));
-  const someSelected = urls.some((url) => selectedIds.has(url._id)) && !allSelected;
+  const allSelected =
+    urls.length > 0 && urls.every((url) => selectedIds.has(url._id));
+
+  const someSelected =
+    urls.some((url) => selectedIds.has(url._id)) && !allSelected;
 
   const getShortUrl = (url) => {
     const identifier = url.customAlias || url.shortCode;
@@ -105,7 +114,7 @@ export function HistoryTable({
       setTimeout(() => {
         setCopiedId(null);
       }, 1500);
-    } catch (error) {
+    } catch {
       toast.error("Failed to copy link");
     }
   };
@@ -119,6 +128,7 @@ export function HistoryTable({
       toast.success(
         res.data.data.isActive ? "Link activated" : "Link deactivated",
       );
+
       onRefresh?.();
     } catch (error) {
       toast.error(
@@ -136,11 +146,14 @@ export function HistoryTable({
           <TableRow>
             <TableHead className="w-10">
               <Checkbox
-                checked={allSelected ? true : someSelected ? "indeterminate" : false}
+                checked={
+                  allSelected ? true : someSelected ? "indeterminate" : false
+                }
                 onCheckedChange={() => onToggleSelectAll?.(urls)}
                 aria-label="Select all"
               />
             </TableHead>
+
             <TableHead>URL</TableHead>
             <TableHead>Short Link</TableHead>
             <TableHead>Clicks</TableHead>
@@ -168,7 +181,10 @@ export function HistoryTable({
               const currentStatus = getStatus(url);
 
               return (
-                <TableRow key={url._id} data-state={selectedIds.has(url._id) ? "selected" : undefined}>
+                <TableRow
+                  key={url._id}
+                  data-state={selectedIds.has(url._id) ? "selected" : undefined}
+                >
                   <TableCell>
                     <Checkbox
                       checked={selectedIds.has(url._id)}
@@ -214,7 +230,9 @@ export function HistoryTable({
                   </TableCell>
 
                   <TableCell className="whitespace-nowrap">
-                    {url.maxClicks === -1 ? "Unlimited" : (url.maxClicks ?? "—")}
+                    {url.maxClicks === -1
+                      ? "Unlimited"
+                      : (url.maxClicks ?? "—")}
                   </TableCell>
 
                   <TableCell className="whitespace-nowrap">
@@ -254,6 +272,11 @@ export function HistoryTable({
                         >
                           <BarChart3Icon />
                           Analytics
+                        </DropdownMenuItem>
+
+                        <DropdownMenuItem onClick={() => setQrUrl(url)}>
+                          <QrCodeIcon />
+                          QR Code
                         </DropdownMenuItem>
 
                         <DropdownMenuItem onClick={() => setEditingUrl(url)}>
@@ -309,6 +332,12 @@ export function HistoryTable({
         open={!!deletingUrl}
         onOpenChange={(open) => !open && setDeletingUrl(null)}
         onDeleted={onRefresh}
+      />
+
+      <QRCodeDialog
+        url={qrUrl}
+        open={!!qrUrl}
+        onOpenChange={(open) => !open && setQrUrl(null)}
       />
     </div>
   );

@@ -156,7 +156,11 @@ export default function LinkAnalytics() {
   const shortUrl = shortIdentifier ? `shrinkr.link/${shortIdentifier}` : null;
 
   const isExpired = url?.expiresAt && new Date(url.expiresAt) < new Date();
-  const status = isExpired ? "Expired" : url?.isActive === false ? "Inactive" : "Active";
+  const status = isExpired
+    ? "Expired"
+    : url?.isActive === false
+      ? "Inactive"
+      : "Active";
 
   const handleCopy = async () => {
     if (!shortUrl) return;
@@ -222,7 +226,10 @@ export default function LinkAnalytics() {
                   <span className="sr-only">Copy short link</span>
                 </Button>
 
-                <Badge variant="outline" className={getStatusBadgeClass(status)}>
+                <Badge
+                  variant="outline"
+                  className={getStatusBadgeClass(status)}
+                >
                   {status}
                 </Badge>
               </div>
@@ -293,9 +300,7 @@ export default function LinkAnalytics() {
                     selected={
                       customStartDate ? new Date(customStartDate) : undefined
                     }
-                    onSelect={(date) =>
-                      setCustomStartDate(formatApiDate(date))
-                    }
+                    onSelect={(date) => setCustomStartDate(formatApiDate(date))}
                   />
                 </PopoverContent>
               </Popover>

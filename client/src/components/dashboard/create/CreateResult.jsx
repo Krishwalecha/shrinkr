@@ -1,4 +1,5 @@
-import { Copy, ExternalLink, Link2, QrCode } from "lucide-react";
+import { useRef } from "react";
+import { Copy, Download, ExternalLink, Link2, QrCode } from "lucide-react";
 import QRCode from "react-qr-code";
 
 import { Badge } from "@/components/ui/badge";
@@ -16,6 +17,8 @@ export function CreateResult({
   onToggleQr,
   onCreateAnother,
 }) {
+  const qrRef = useRef(null);
+
   const isExpired = result.expiresAt && new Date(result.expiresAt) < new Date();
 
   const status = isExpired
@@ -23,6 +26,67 @@ export function CreateResult({
     : result.isActive === false
       ? "Inactive"
       : "Active";
+
+  const handleDownloadQr = () => {
+    const svg = qrRef.current?.querySelector("svg");
+
+    if (!svg) return;
+
+    const serializer = new XMLSerializer();
+    const svgString = serializer.serializeToString(svg);
+
+    const svgBlob = new Blob([svgString], {
+      type: "image/svg+xml;charset=utf-8",
+    });
+
+    const svgUrl = URL.createObjectURL(svgBlob);
+
+    const image = new Image();
+
+    image.onload = () => {
+      const canvas = document.createElement("canvas");
+
+      const size = 1000;
+
+      canvas.width = size;
+      canvas.height = size;
+
+      const context = canvas.getContext("2d");
+
+      if (!context) {
+        URL.revokeObjectURL(svgUrl);
+        return;
+      }
+
+      // White background
+      context.fillStyle = "#ffffff";
+      context.fillRect(0, 0, size, size);
+
+      // Draw SVG onto canvas
+      context.drawImage(image, 0, 0, size, size);
+
+      URL.revokeObjectURL(svgUrl);
+
+      // Convert canvas to PNG
+      canvas.toBlob((blob) => {
+        if (!blob) return;
+
+        const pngUrl = URL.createObjectURL(blob);
+
+        const link = document.createElement("a");
+        link.href = pngUrl;
+        link.download = "shrinkr-qr.png";
+
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+
+        URL.revokeObjectURL(pngUrl);
+      }, "image/png");
+    };
+
+    image.src = svgUrl;
+  };
 
   return (
     <Card>
@@ -85,7 +149,7 @@ export function CreateResult({
               </Button>
 
               <Button size="sm" onClick={onOpen} className="cursor-pointer">
-                <ExternalLink className="size-4 " />
+                <ExternalLink className="size-4" />
                 Open
               </Button>
             </div>
@@ -107,19 +171,33 @@ export function CreateResult({
             </div>
           </div>
 
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={onToggleQr}
-            className="hover:text-primary cursor-pointer"
-          >
-            {showQr ? "Hide QR" : "Show QR"}
-          </Button>
+          <div className="flex gap-2">
+            {showQr && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleDownloadQr}
+                className="cursor-pointer hover:text-primary"
+              >
+                <Download className="size-4" />
+                Download
+              </Button>
+            )}
+
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={onToggleQr}
+              className="cursor-pointer hover:text-primary"
+            >
+              {showQr ? "Hide QR" : "Show QR"}
+            </Button>
+          </div>
         </div>
 
         {showQr && (
           <div className="flex justify-center rounded-xl border border-border bg-muted/50 p-8">
-            <div className="rounded-lg bg-card p-4 shadow-xs">
+            <div ref={qrRef} className="rounded-lg bg-card p-4 shadow-xs">
               <QRCode value={shortUrl} size={220} />
             </div>
           </div>
@@ -142,7 +220,7 @@ export function CreateResult({
             </p>
           </div>
 
-          <div className="border-b border-border p-5 sm:border-b-0 sm:border-r ">
+          <div className="border-b border-border p-5 sm:border-b-0 sm:border-r">
             <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
               Max Clicks
             </p>
@@ -167,7 +245,7 @@ export function CreateResult({
           <Button
             variant="outline"
             onClick={onCreateAnother}
-            className="hover:text-primary cursor-pointer"
+            className="cursor-pointer hover:text-primary"
           >
             <Link2 className="size-4" />
             Create Another
