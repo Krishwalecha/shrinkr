@@ -43,9 +43,9 @@ const steps = [
             <Link2 size={17} strokeWidth={1.7} />
           </IconBox>
 
-          <h4 className="mt-3 text-sm font-semibold tracking-tight text-foreground">
+          <p className="mt-3 text-sm font-semibold tracking-tight text-foreground">
             Paste your long URL
-          </h4>
+          </p>
 
           <p className="mt-1 max-w-[220px] text-[11px] leading-4 text-muted-foreground">
             Start with any link you want to shorten.
