@@ -1,6 +1,6 @@
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { FaGoogle, FaGithub } from "react-icons/fa";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Loader from "@/components/Loader.jsx";
 import { Eye, EyeOff, ChevronLeft } from "lucide-react";
 import { toast } from "sonner";
@@ -10,10 +10,13 @@ import api from "@/lib/api";
 import { useTheme } from "@/context/ThemeContext";
 
 const Signin = () => {
-  const { setUser } = useAuth();
+  const { setUser, user } = useAuth();
   const { resolvedTheme } = useTheme();
 
   const navigate = useNavigate();
+  if (user) navigate("/");
+
+  const [searchParams] = useSearchParams();
 
   const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
@@ -22,6 +25,14 @@ const Signin = () => {
   const [showPassword, setShowPassword] = useState(false);
 
   const isDark = resolvedTheme === "dark";
+
+  useEffect(() => {
+    const error = searchParams.get("error");
+
+    if (error) {
+      toast.error("Something went wrong signing in, please try again");
+    }
+  }, [searchParams]);
 
   const handleLogin = async () => {
     let res;
@@ -278,6 +289,9 @@ const Signin = () => {
               <div className="space-y-2">
                 <button
                   type="button"
+                  onClick={() => {
+                    window.location.href = `${api.defaults.baseURL}/auth/google`;
+                  }}
                   className={`flex h-11 w-full cursor-pointer items-center justify-center gap-2 rounded-xl border text-sm transition-colors duration-150 ${
                     isDark
                       ? "border-white/10 bg-white/[0.04] text-white/75 hover:bg-white/[0.07] hover:text-white"
@@ -290,6 +304,9 @@ const Signin = () => {
 
                 <button
                   type="button"
+                  onClick={() => {
+                    window.location.href = `${api.defaults.baseURL}/auth/github`;
+                  }}
                   className={`flex h-11 w-full cursor-pointer items-center justify-center gap-2 rounded-xl border text-sm transition-colors duration-150 ${
                     isDark
                       ? "border-white/10 bg-white/[0.04] text-white/75 hover:bg-white/[0.07] hover:text-white"

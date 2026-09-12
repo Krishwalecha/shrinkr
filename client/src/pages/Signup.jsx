@@ -7,9 +7,14 @@ import { Eye, EyeOff, ChevronLeft } from "lucide-react";
 import { toast } from "sonner";
 import api from "@/lib/api";
 import { useTheme } from "@/context/ThemeContext";
+import { useAuth } from "@/context/AuthContext";
 
 const SignUp = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
+
+  if (user) navigate("/");
+
   const { resolvedTheme } = useTheme();
 
   const isDark = resolvedTheme === "dark";
@@ -301,6 +306,9 @@ const SignUp = () => {
               <div className="space-y-2">
                 <button
                   type="button"
+                  onClick={() => {
+                    window.location.href = `${api.defaults.baseURL}/auth/google`;
+                  }}
                   className={`flex h-11 w-full cursor-pointer items-center justify-center gap-2 rounded-xl border text-sm transition-colors duration-150 ${
                     isDark
                       ? "border-white/10 bg-white/[0.04] text-white/75 hover:bg-white/[0.07] hover:text-white"
@@ -313,6 +321,9 @@ const SignUp = () => {
 
                 <button
                   type="button"
+                  onClick={() => {
+                    window.location.href = `${api.defaults.baseURL}/auth/github`;
+                  }}
                   className={`flex h-11 w-full cursor-pointer items-center justify-center gap-2 rounded-xl border text-sm transition-colors duration-150 ${
                     isDark
                       ? "border-white/10 bg-white/[0.04] text-white/75 hover:bg-white/[0.07] hover:text-white"

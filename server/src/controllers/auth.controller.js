@@ -191,4 +191,12 @@ const generateTokens = (user) => {
   };
 };
 
-export { registerUser, loginUser, logoutUser, refreshAccessToken };
+export {
+  registerUser,
+  loginUser,
+  logoutUser,
+  refreshAccessToken,
+  accessTokenOptions,
+  refreshTokenOptions,
+  generateTokens,
+};
