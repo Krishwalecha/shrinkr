@@ -465,23 +465,32 @@ const getOverview = asyncHandler(async (req, res) => {
 
 const updateAnalytics = async (req, url) => {
   const urlId = url._id;
-  const ip = req.ip;
+
+  let ip =
+    req.headers["x-forwarded-for"]?.split(",")[0]?.trim() ||
+    req.ip ||
+    req.socket?.remoteAddress ||
+    "";
+
+  if (ip.startsWith("::ffff:")) {
+    ip = ip.substring(7);
+  }
 
   let country = "Unknown";
 
   try {
-    const response = await fetch(
-      `http://ip-api.com/json/${encodeURIComponent(
-        ip,
-      )}?fields=status,country,message`,
-    );
+    if (ip) {
+      const response = await fetch(
+        `https://ipwho.is/${encodeURIComponent(ip)}`,
+      );
 
-    const data = await response.json();
+      const data = await response.json();
 
-    if (data?.status === "success") {
-      country = data.country || "Unknown";
+      if (response.ok && data?.success) {
+        country = data.country || "Unknown";
+      }
     }
-  } catch (error) {}
+  } catch {}
 
   const userAgent = req.headers["user-agent"] || "";
   const parsedUserAgent = UAParser(userAgent);

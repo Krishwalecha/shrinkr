@@ -73,7 +73,7 @@ export function AppSidebar({ ...props }) {
               asChild
               className="h-11 px-3 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
             >
-              <a href="/dashboard/overview">
+              <a href="/">
                 <span className="text-xl font-semibold tracking-tight text-foreground group-data-[collapsible=icon]:hidden">
                   shrinkr.
                 </span>
