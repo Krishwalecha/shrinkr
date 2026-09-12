@@ -41,7 +41,7 @@ export function ProfileForm() {
     try {
       setSaving(true);
 
-      const res = await api.patch("/auth/me", {
+      const res = await api.patch("/users/me", {
         name: name.trim(),
         username: username.trim(),
         email: email.trim(),

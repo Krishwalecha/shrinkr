@@ -40,7 +40,7 @@ export function PasswordForm() {
     try {
       setSaving(true);
 
-      await api.patch("/auth/change-password", {
+      await api.patch("/users/change-password", {
         currentPassword,
         newPassword,
       });

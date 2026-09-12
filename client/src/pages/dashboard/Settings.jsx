@@ -4,6 +4,7 @@ import { PageHeader } from "@/components/dashboard/shared/page-header";
 import { ProfileForm } from "@/components/dashboard/settings/profile-form";
 import { PasswordForm } from "@/components/dashboard/settings/password-form";
 import { AppearanceForm } from "@/components/dashboard/settings/appearance-form";
+import { DeleteAccount } from "@/components/dashboard/settings/delete-account";
 
 export default function Settings() {
   return (
@@ -14,10 +15,11 @@ export default function Settings() {
         description="Manage your account details and security."
       />
 
-      <div className="grid gap-6 lg:max-w-2xl">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <ProfileForm />
-        <AppearanceForm />
         <PasswordForm />
+        <AppearanceForm />
+        <DeleteAccount />
       </div>
     </div>
   );
